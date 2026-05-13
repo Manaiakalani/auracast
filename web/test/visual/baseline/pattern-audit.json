@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-05-13T03:04:01.716Z",
+  "generatedAt": "2026-05-13T07:50:57.268Z",
   "patterns": {
     "matrix": {
       "samples": [
@@ -50,17 +50,17 @@
         },
         {
           "frame": 4,
-          "bytes": 17802,
-          "ahash": "3c7cffffdfde623c"
+          "bytes": 18595,
+          "ahash": "387efeff7fe76638"
         },
         {
           "frame": 8,
-          "bytes": 19500,
-          "ahash": "247ed97f779f5e24"
+          "bytes": 17949,
+          "ahash": "303effff7b7b4e30"
         }
       ],
-      "totalBytes": 224090,
-      "seamDist": 10
+      "totalBytes": 224060,
+      "seamDist": 1
     },
     "braille": {
       "samples": [
@@ -217,16 +217,16 @@
         },
         {
           "frame": 4,
-          "bytes": 16644,
-          "ahash": "0042183c3c180000"
+          "bytes": 16734,
+          "ahash": "0042583c3c180000"
         },
         {
           "frame": 8,
-          "bytes": 16715,
+          "bytes": 16672,
           "ahash": "0042183c3c180000"
         }
       ],
-      "totalBytes": 200613,
+      "totalBytes": 200849,
       "seamDist": 1
     },
     "campus-9": {
@@ -378,21 +378,21 @@
       "samples": [
         {
           "frame": 0,
-          "bytes": 4314,
-          "ahash": "ffffffffffffffff"
+          "bytes": 23617,
+          "ahash": "18665abdbd5a6618"
         },
         {
           "frame": 4,
-          "bytes": 4314,
-          "ahash": "ffffffffffffffff"
+          "bytes": 17731,
+          "ahash": "003c7e7e7e7e3c00"
         },
         {
           "frame": 8,
-          "bytes": 4314,
-          "ahash": "ffffffffffffffff"
+          "bytes": 19788,
+          "ahash": "187e7ee7e77e7e18"
         }
       ],
-      "totalBytes": 51768,
+      "totalBytes": 239618,
       "seamDist": 0
     },
     "dither": {
@@ -499,6 +499,111 @@
       ],
       "totalBytes": 90507,
       "seamDist": 4
+    },
+    "danmaku": {
+      "samples": [
+        {
+          "frame": 0,
+          "bytes": 6103,
+          "ahash": "3c7effffffff7e3c"
+        },
+        {
+          "frame": 4,
+          "bytes": 13413,
+          "ahash": "000000f8f8000000"
+        },
+        {
+          "frame": 8,
+          "bytes": 13321,
+          "ahash": "0000001f1d000000"
+        }
+      ],
+      "totalBytes": 137748,
+      "seamDist": 0
+    },
+    "clock": {
+      "samples": [
+        {
+          "frame": 0,
+          "bytes": 9015,
+          "ahash": "3c7effffffff7e3c"
+        },
+        {
+          "frame": 4,
+          "bytes": 9348,
+          "ahash": "3c7effffffff7e3c"
+        },
+        {
+          "frame": 8,
+          "bytes": 9374,
+          "ahash": "3c7effffffff7e3c"
+        }
+      ],
+      "totalBytes": 110136,
+      "seamDist": 0
+    },
+    "fireworks": {
+      "samples": [
+        {
+          "frame": 0,
+          "bytes": 6384,
+          "ahash": "3c7effffffff7e3c"
+        },
+        {
+          "frame": 4,
+          "bytes": 6575,
+          "ahash": "3c7effffffff7e3c"
+        },
+        {
+          "frame": 8,
+          "bytes": 7011,
+          "ahash": "3c7effffffff7e3c"
+        }
+      ],
+      "totalBytes": 80357,
+      "seamDist": 1
+    },
+    "flow-field": {
+      "samples": [
+        {
+          "frame": 0,
+          "bytes": 20015,
+          "ahash": "306c96a77fbb3c28"
+        },
+        {
+          "frame": 4,
+          "bytes": 20307,
+          "ahash": "3c7cc272d9bc5e38"
+        },
+        {
+          "frame": 8,
+          "bytes": 20778,
+          "ahash": "287e55adbedf742c"
+        }
+      ],
+      "totalBytes": 246074,
+      "seamDist": 24
+    },
+    "reaction-diffusion": {
+      "samples": [
+        {
+          "frame": 0,
+          "bytes": 4314,
+          "ahash": "ffffffffffffffff"
+        },
+        {
+          "frame": 4,
+          "bytes": 4314,
+          "ahash": "ffffffffffffffff"
+        },
+        {
+          "frame": 8,
+          "bytes": 4314,
+          "ahash": "ffffffffffffffff"
+        }
+      ],
+      "totalBytes": 51768,
+      "seamDist": 0
     }
   },
   "text": {
