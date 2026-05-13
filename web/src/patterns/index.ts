@@ -27,7 +27,7 @@ import {
   generateTheDawning,
 } from './destiny'
 
-export { PatternOptions }
+export type { PatternOptions }
 
 export const GENERATORS: Record<string, (opts: PatternOptions) => Promise<Uint8Array[]>> = {
   matrixRain: generateMatrixRain,

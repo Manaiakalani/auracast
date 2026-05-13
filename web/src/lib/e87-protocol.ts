@@ -149,10 +149,10 @@ async function writeChunkTo(target: BluetoothRemoteGATTCharacteristic, chunk: Ui
   // Uint8Array.from() is just wasted memcpy on the upload hot path. (~MB/s
   // saved across a full slot upload.)
   if (target.properties.writeWithoutResponse && target.writeValueWithoutResponse) {
-    await target.writeValueWithoutResponse(chunk)
+    await target.writeValueWithoutResponse(chunk as BufferSource)
     return
   }
-  await target.writeValue(chunk)
+  await target.writeValue(chunk as BufferSource)
 }
 
 // ─── Characteristic discovery ───

@@ -147,7 +147,7 @@ export async function fitJpegFramesToBudget(
   try {
     for (const jpeg of frames) {
       // No need to wrap in a fresh Uint8Array - Blob copies the bytes itself.
-      const blob = new Blob([jpeg], { type: 'image/jpeg' })
+      const blob = new Blob([jpeg as BlobPart], { type: 'image/jpeg' })
       bitmaps.push(await createImageBitmap(blob))
     }
 

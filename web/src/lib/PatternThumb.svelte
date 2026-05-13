@@ -96,7 +96,7 @@
       const jpegs = await handle.result
       activeHandle = null
       const bitmaps = await Promise.all(
-        jpegs.map(j => createImageBitmap(new Blob([j.buffer.slice(j.byteOffset, j.byteOffset + j.byteLength)], { type: 'image/jpeg' })))
+        jpegs.map(j => createImageBitmap(new Blob([new Uint8Array(j)], { type: 'image/jpeg' })))
       )
       frames = bitmaps
       genState = 'done'
