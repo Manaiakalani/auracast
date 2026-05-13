@@ -1,0 +1,285 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* WIG: dark color scheme on root so native UI (scrollbars, form controls,
+   spinners) follows. */
+:root {
+  font-family: 'Manrope Variable', Manrope, system-ui, sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+
+  color-scheme: dark;
+  color: rgba(255, 255, 255, 0.87);
+  background-color: #0a0b1e;
+
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* WIG: Headings get balanced wrapping (no widows). Body text gets pretty
+   wrapping where supported. */
+  h1, h2, h3, h4 { text-wrap: balance; }
+p { text-wrap: pretty; }
+
+/* WIG: Number columns and counters use tabular-nums so digit width doesn't
+   jitter as values change (progress %, KB, fps, frame counts). */
+.tabular, [data-tabular] {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum";
+}
+
+/* WIG: Eliminate the iOS double-tap zoom delay on every interactive
+   element, and remove the grey tap highlight (we have :active styles). */
+button, a, [role="button"], input, select, textarea, summary {
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Wrap globals in @layer base so Tailwind utility classes override them. */
+@layer base {
+  /* Space Grotesk for all display + headline type scale sizes.
+     Its ink traps and geometric personality give headings character
+     that Manrope (body font) intentionally doesn't compete with. */
+  h1, h2, h3, h4,
+  .text-display-lg, .text-display-md, .text-display-sm,
+  .text-headline-lg, .text-headline-md, .text-headline-sm {
+    font-family: var(--md-sys-typescale-font-brand);
+  }
+
+  a {
+    font-weight: 500;
+    color: var(--md-sys-color-primary);
+    text-decoration: inherit;
+  }
+  a:hover {
+    color: var(--md-sys-color-primary);
+    text-decoration: underline;
+  }
+
+  body {
+    margin: 0;
+    min-height: 100vh;
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  h1 {
+    /* size comes from text-* utilities (M3 type scale) */
+    font-size: inherit;
+    line-height: inherit;
+    font-weight: inherit;
+    margin: 0;
+  }
+
+  #app {
+    /* Full-bleed app shell: the header, rail, and main share the viewport
+       edges so the rail can sit flush against the left edge of the page.
+       Content inside <main> is independently capped at 1280px by an inner
+       wrapper, which keeps reading width comfortable. */
+    max-width: 100%;
+    margin: 0;
+    padding: 0;
+    text-align: left;
+  }
+
+  /* ── M3 native form controls baseline ─────────────────────────────────
+     Style raw <input>, <select>, color, range elements used by mode
+     subcomponents so they match the M3 token system without each
+     component needing its own per-control CSS. The M3 Button component
+     has its own classes and is unaffected by these rules. */
+
+  input[type="text"],
+  input[type="url"],
+  input[type="search"],
+  input[type="number"],
+  input[type="email"],
+  textarea,
+  select {
+    background: var(--md-sys-color-surface-container-low);
+    color: var(--md-sys-color-on-surface);
+    border: 1px solid var(--md-sys-color-outline-variant);
+    border-radius: 12px;
+    padding: 0.625rem 0.875rem;
+    /* iOS Safari zooms in on focus when input font-size < 16px. Use 16px on
+       touch viewports to suppress the zoom; tighter desktop sizing below. */
+    font-size: 16px;
+    font-family: inherit;
+    transition: border-color 150ms cubic-bezier(0.2, 0, 0, 1),
+                background-color 150ms cubic-bezier(0.2, 0, 0, 1);
+    width: 100%;
+    min-height: 44px;
+  }
+  @media (hover: hover) and (pointer: fine) {
+    input[type="text"],
+    input[type="url"],
+    input[type="search"],
+    input[type="number"],
+    input[type="email"],
+    textarea,
+    select {
+      font-size: 0.875rem;
+    }
+  }
+  input[type="text"]:hover,
+  input[type="url"]:hover,
+  input[type="search"]:hover,
+  input[type="number"]:hover,
+  input[type="email"]:hover,
+  textarea:hover,
+  select:hover {
+    border-color: var(--md-sys-color-on-surface-variant);
+    background: var(--md-sys-color-surface-container);
+  }
+  input[type="text"]:focus-visible,
+  input[type="url"]:focus-visible,
+  input[type="search"]:focus-visible,
+  input[type="number"]:focus-visible,
+  input[type="email"]:focus-visible,
+  textarea:focus-visible,
+  select:focus-visible {
+    outline: 2px solid var(--md-sys-color-primary);
+    outline-offset: 2px;
+    border-color: var(--md-sys-color-primary);
+  }
+  input:disabled,
+  select:disabled,
+  textarea:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+
+  /* M3 color swatch input - square pill */
+  input[type="color"] {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    border: 1px solid var(--md-sys-color-outline-variant);
+    background: var(--md-sys-color-surface-container-low);
+    padding: 4px;
+    cursor: pointer;
+    transition: border-color 150ms cubic-bezier(0.2, 0, 0, 1);
+  }
+  input[type="color"]:hover { border-color: var(--md-sys-color-primary); }
+  input[type="color"]:disabled { opacity: 0.4; cursor: not-allowed; }
+  input[type="color"]::-webkit-color-swatch-wrapper { padding: 0; }
+  input[type="color"]::-webkit-color-swatch { border: none; border-radius: 8px; }
+  input[type="color"]::-moz-color-swatch { border: none; border-radius: 8px; }
+
+  /* M3 range slider - track + thumb in primary.
+     Track uses outline-variant so it stays visible on filled cards
+     (which sit on surface-container-highest). */
+  input[type="range"] {
+    width: 100%;
+    height: 32px;
+    background: transparent;
+    -webkit-appearance: none;
+    appearance: none;
+    accent-color: var(--md-sys-color-primary);
+    cursor: pointer;
+  }
+  input[type="range"]::-webkit-slider-runnable-track {
+    height: 4px;
+    background: color-mix(in oklab, var(--md-sys-color-on-surface-variant) 32%, transparent);
+    border-radius: 9999px;
+  }
+  input[type="range"]::-moz-range-track {
+    height: 4px;
+    background: color-mix(in oklab, var(--md-sys-color-on-surface-variant) 32%, transparent);
+    border-radius: 9999px;
+  }
+  input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 20px;
+    height: 20px;
+    border-radius: 9999px;
+    background: var(--md-sys-color-primary);
+    border: 2px solid var(--md-sys-color-surface);
+    margin-top: -8px;
+    box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.25);
+    cursor: pointer;
+    transition: transform 120ms cubic-bezier(0.2, 0, 0, 1);
+  }
+  input[type="range"]::-moz-range-thumb {
+    width: 20px;
+    height: 20px;
+    border-radius: 9999px;
+    background: var(--md-sys-color-primary);
+    border: 2px solid var(--md-sys-color-surface);
+    cursor: pointer;
+    box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.25);
+  }
+  input[type="range"]:hover::-webkit-slider-thumb { transform: scale(1.15); }
+  input[type="range"]:hover::-moz-range-thumb { transform: scale(1.15); }
+  input[type="range"]:disabled { opacity: 0.4; cursor: not-allowed; }
+
+  /* Bare button reset only - no opinionated styling. Each button gets
+     its visual identity from Tailwind utilities or component CSS. */
+  button {
+    border: 0;
+    background: transparent;
+    color: inherit;
+    font: inherit;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+  }
+  button:disabled { cursor: not-allowed; }
+}
+
+/* Universal :focus-visible ring - wins against utility classes and ensures
+   keyboard users always get a visible focus indicator (a11y baseline). */
+:focus-visible {
+  outline: 2px solid var(--md-sys-color-primary);
+  outline-offset: 2px;
+}
+button:focus:not(:focus-visible),
+[role="button"]:focus:not(:focus-visible),
+a:focus:not(:focus-visible) {
+  /* Suppress sticky focus ring after mouse-click. */
+  outline: none;
+}
+
+/* ── Aura aesthetic - cyan/purple neon utilities ─────────────────── */
+.bg-circuit-pattern {
+  /* Self-hosted SVG (external CDN was blocked by browser ORB). */
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='120' height='120' viewBox='0 0 120 120'><g fill='none' stroke='%2300f2ff' stroke-width='0.6' stroke-linecap='round' stroke-linejoin='round'><path d='M10 10 H40 V30 H70'/><path d='M70 30 V60 H100'/><path d='M30 60 V90 H60'/><path d='M60 90 H90 V110'/><path d='M10 70 H30'/><path d='M90 10 V40'/><circle cx='40' cy='30' r='2'/><circle cx='70' cy='30' r='2'/><circle cx='70' cy='60' r='2'/><circle cx='100' cy='60' r='2'/><circle cx='30' cy='60' r='2'/><circle cx='60' cy='90' r='2'/><circle cx='90' cy='90' r='2'/><circle cx='30' cy='70' r='1.5'/><circle cx='90' cy='40' r='1.5'/><rect x='44' y='14' width='10' height='6' rx='1'/><rect x='84' y='64' width='10' height='6' rx='1'/></g></svg>");
+  background-size: 240px 240px;
+  background-repeat: repeat;
+}
+
+/* Selection uses the M3 primary token so it tracks light/dark theme. */
+::selection {
+  background-color: color-mix(in srgb, var(--md-sys-color-primary) 35%, transparent);
+  color: var(--md-sys-color-on-primary);
+}
+
+/* Badge-preview ring - works on <img> via stacked box-shadows
+   (cyan→purple gradient ring + soft outer glow) */
+.aura-preview-ring {
+  border: 0 !important;
+  box-shadow:
+    0 0 0 2px #0a0b1e,
+    0 0 0 4px rgba(0, 242, 255, 0.55),
+    0 0 0 6px rgba(188, 0, 255, 0.40),
+    0 0 28px rgba(0, 242, 255, 0.28);
+}
+
+/* WIG: respect prefers-reduced-motion globally - collapses every
+   animation and transition to a near-instant snap. The user can still
+   see state change but is not subjected to motion. Long-running content
+   animations (the badge preview frames) remain - they communicate the
+   actual hardware behavior, which the user opted into. */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* WIG: modal/drawer/sheet scrollables should not chain scroll to the body. */
+.contain-scroll { overscroll-behavior: contain; }

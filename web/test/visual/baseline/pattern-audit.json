@@ -1,0 +1,656 @@
+{
+  "generatedAt": "2026-05-13T03:04:01.716Z",
+  "patterns": {
+    "matrix": {
+      "samples": [
+        {
+          "frame": 0,
+          "bytes": 26123,
+          "ahash": "0002022008240410"
+        },
+        {
+          "frame": 4,
+          "bytes": 25948,
+          "ahash": "0808111191100000"
+        },
+        {
+          "frame": 8,
+          "bytes": 24659,
+          "ahash": "0020002400444600"
+        }
+      ],
+      "totalBytes": 311700
+    },
+    "gameoflife": {
+      "samples": [
+        {
+          "frame": 0,
+          "bytes": 29238,
+          "ahash": "1028100002000008"
+        },
+        {
+          "frame": 4,
+          "bytes": 32171,
+          "ahash": "1028100000040000"
+        },
+        {
+          "frame": 8,
+          "bytes": 30794,
+          "ahash": "1028900000040008"
+        }
+      ],
+      "totalBytes": 369266
+    },
+    "plasma": {
+      "samples": [
+        {
+          "frame": 0,
+          "bytes": 19078,
+          "ahash": "3c7cffc7eff31c3c"
+        },
+        {
+          "frame": 4,
+          "bytes": 17802,
+          "ahash": "3c7cffffdfde623c"
+        },
+        {
+          "frame": 8,
+          "bytes": 19500,
+          "ahash": "247ed97f779f5e24"
+        }
+      ],
+      "totalBytes": 224090,
+      "seamDist": 10
+    },
+    "braille": {
+      "samples": [
+        {
+          "frame": 0,
+          "bytes": 19411,
+          "ahash": "107c425bdc421c00"
+        },
+        {
+          "frame": 4,
+          "bytes": 19411,
+          "ahash": "107c425bdc421c00"
+        },
+        {
+          "frame": 8,
+          "bytes": 19411,
+          "ahash": "107c425bdc421c00"
+        }
+      ],
+      "totalBytes": 236034
+    },
+    "aurora": {
+      "samples": [
+        {
+          "frame": 0,
+          "bytes": 15154,
+          "ahash": "0066ff3fffff3800"
+        },
+        {
+          "frame": 4,
+          "bytes": 15198,
+          "ahash": "0010fffeffff1e00"
+        },
+        {
+          "frame": 8,
+          "bytes": 15181,
+          "ahash": "000cfffbbfff6200"
+        }
+      ],
+      "totalBytes": 181390,
+      "seamDist": 5
+    },
+    "radar": {
+      "samples": [
+        {
+          "frame": 0,
+          "bytes": 17553,
+          "ahash": "005a245a50607000"
+        },
+        {
+          "frame": 4,
+          "bytes": 18425,
+          "ahash": "005a245a47030000"
+        },
+        {
+          "frame": 8,
+          "bytes": 18079,
+          "ahash": "305e345a40001000"
+        }
+      ],
+      "totalBytes": 218719,
+      "seamDist": 7
+    },
+    "arc-radar": {
+      "samples": [
+        {
+          "frame": 0,
+          "bytes": 16670,
+          "ahash": "00002418182c480c"
+        },
+        {
+          "frame": 4,
+          "bytes": 17349,
+          "ahash": "0000e4f81c3c0000"
+        },
+        {
+          "frame": 8,
+          "bytes": 17347,
+          "ahash": "000226181a240400"
+        }
+      ],
+      "totalBytes": 204529,
+      "seamDist": 1
+    },
+    "arc-radar-hd": {
+      "samples": [
+        {
+          "frame": 0,
+          "bytes": 21666,
+          "ahash": "0000881000810020"
+        },
+        {
+          "frame": 4,
+          "bytes": 20372,
+          "ahash": "0000401000802000"
+        },
+        {
+          "frame": 8,
+          "bytes": 22603,
+          "ahash": "0400020800802000"
+        }
+      ],
+      "totalBytes": 252896,
+      "seamDist": 6
+    },
+    "beskar-sigil": {
+      "samples": [
+        {
+          "frame": 0,
+          "bytes": 26772,
+          "ahash": "00201838707c7000"
+        },
+        {
+          "frame": 4,
+          "bytes": 26425,
+          "ahash": "1038383c101c0000"
+        },
+        {
+          "frame": 8,
+          "bytes": 26761,
+          "ahash": "0020183e1e1e0000"
+        }
+      ],
+      "totalBytes": 320012,
+      "seamDist": 2
+    },
+    "mando-compass": {
+      "samples": [
+        {
+          "frame": 0,
+          "bytes": 34315,
+          "ahash": "003c3a5262001c00"
+        },
+        {
+          "frame": 4,
+          "bytes": 33721,
+          "ahash": "003c405272703800"
+        },
+        {
+          "frame": 8,
+          "bytes": 34174,
+          "ahash": "0038004e6e063c00"
+        }
+      ],
+      "totalBytes": 409112,
+      "seamDist": 1
+    },
+    "the-traveller": {
+      "samples": [
+        {
+          "frame": 0,
+          "bytes": 16675,
+          "ahash": "0042383c3c180000"
+        },
+        {
+          "frame": 4,
+          "bytes": 16644,
+          "ahash": "0042183c3c180000"
+        },
+        {
+          "frame": 8,
+          "bytes": 16715,
+          "ahash": "0042183c3c180000"
+        }
+      ],
+      "totalBytes": 200613,
+      "seamDist": 1
+    },
+    "campus-9": {
+      "samples": [
+        {
+          "frame": 0,
+          "bytes": 21054,
+          "ahash": "000024ffff180000"
+        },
+        {
+          "frame": 4,
+          "bytes": 21774,
+          "ahash": "00003c7eff180000"
+        },
+        {
+          "frame": 8,
+          "bytes": 21774,
+          "ahash": "00003c7eff180000"
+        }
+      ],
+      "totalBytes": 259663
+    },
+    "ishtar-sink": {
+      "samples": [
+        {
+          "frame": 0,
+          "bytes": 19586,
+          "ahash": "0000249818240400"
+        },
+        {
+          "frame": 4,
+          "bytes": 19799,
+          "ahash": "0000249818240000"
+        },
+        {
+          "frame": 8,
+          "bytes": 19936,
+          "ahash": "0000249818240000"
+        }
+      ],
+      "totalBytes": 237665,
+      "seamDist": 4
+    },
+    "altar-of-oryx": {
+      "samples": [
+        {
+          "frame": 0,
+          "bytes": 12253,
+          "ahash": "00003c3c3c180000"
+        },
+        {
+          "frame": 4,
+          "bytes": 11550,
+          "ahash": "00003c3c3c180000"
+        },
+        {
+          "frame": 8,
+          "bytes": 11268,
+          "ahash": "00003c1c3c3c1800"
+        }
+      ],
+      "totalBytes": 139731,
+      "seamDist": 1
+    },
+    "the-dawning": {
+      "samples": [
+        {
+          "frame": 0,
+          "bytes": 11685,
+          "ahash": "00067fffff7e6000"
+        },
+        {
+          "frame": 4,
+          "bytes": 11459,
+          "ahash": "00067fffff7e6000"
+        },
+        {
+          "frame": 8,
+          "bytes": 12501,
+          "ahash": "00067fffff7e2000"
+        }
+      ],
+      "totalBytes": 141465,
+      "seamDist": 1
+    },
+    "spirals": {
+      "samples": [
+        {
+          "frame": 0,
+          "bytes": 31711,
+          "ahash": "300402d89d957e2c"
+        },
+        {
+          "frame": 4,
+          "bytes": 31624,
+          "ahash": "2c565318dd461428"
+        },
+        {
+          "frame": 8,
+          "bytes": 31624,
+          "ahash": "2c565318dd461428"
+        }
+      ],
+      "totalBytes": 373655
+    },
+    "voronoi": {
+      "samples": [
+        {
+          "frame": 0,
+          "bytes": 19085,
+          "ahash": "3c7efdebffbf3e1c"
+        },
+        {
+          "frame": 4,
+          "bytes": 18826,
+          "ahash": "3c7efcedffff3e3c"
+        },
+        {
+          "frame": 8,
+          "bytes": 19065,
+          "ahash": "3c7ef9fde73f3e3c"
+        }
+      ],
+      "totalBytes": 227931,
+      "seamDist": 0
+    },
+    "lava": {
+      "samples": [
+        {
+          "frame": 0,
+          "bytes": 14900,
+          "ahash": "0c7efff60e261604"
+        },
+        {
+          "frame": 4,
+          "bytes": 14124,
+          "ahash": "1c06ceecd1e0601c"
+        },
+        {
+          "frame": 8,
+          "bytes": 15017,
+          "ahash": "3838f8f971e06030"
+        }
+      ],
+      "totalBytes": 180285,
+      "seamDist": 1
+    },
+    "waves": {
+      "samples": [
+        {
+          "frame": 0,
+          "bytes": 4314,
+          "ahash": "ffffffffffffffff"
+        },
+        {
+          "frame": 4,
+          "bytes": 4314,
+          "ahash": "ffffffffffffffff"
+        },
+        {
+          "frame": 8,
+          "bytes": 4314,
+          "ahash": "ffffffffffffffff"
+        }
+      ],
+      "totalBytes": 51768,
+      "seamDist": 0
+    },
+    "dither": {
+      "samples": [
+        {
+          "frame": 0,
+          "bytes": 47329,
+          "ahash": "1c7e7efefc780000"
+        },
+        {
+          "frame": 4,
+          "bytes": 49266,
+          "ahash": "1c7efefefcf06000"
+        },
+        {
+          "frame": 8,
+          "bytes": 42700,
+          "ahash": "00001e3e7f3f3e3c"
+        }
+      ],
+      "totalBytes": 550047,
+      "seamDist": 3
+    },
+    "kaleidoscope": {
+      "samples": [
+        {
+          "frame": 0,
+          "bytes": 22898,
+          "ahash": "2466ff3c3cff6624"
+        },
+        {
+          "frame": 4,
+          "bytes": 23046,
+          "ahash": "3c6abffdbffd563c"
+        },
+        {
+          "frame": 8,
+          "bytes": 20462,
+          "ahash": "3418ed43c6b51c2c"
+        }
+      ],
+      "totalBytes": 264142,
+      "seamDist": 10
+    },
+    "fire": {
+      "samples": [
+        {
+          "frame": 0,
+          "bytes": 9957,
+          "ahash": "3c00891401021200"
+        },
+        {
+          "frame": 4,
+          "bytes": 9509,
+          "ahash": "3c7ec10004000600"
+        },
+        {
+          "frame": 8,
+          "bytes": 9606,
+          "ahash": "3020830010400200"
+        }
+      ],
+      "totalBytes": 117207,
+      "seamDist": 15
+    },
+    "snow": {
+      "samples": [
+        {
+          "frame": 0,
+          "bytes": 9602,
+          "ahash": "3c7eff7f8a000024"
+        },
+        {
+          "frame": 4,
+          "bytes": 9510,
+          "ahash": "3c7effff7f080c00"
+        },
+        {
+          "frame": 8,
+          "bytes": 9528,
+          "ahash": "3c5e040002040000"
+        }
+      ],
+      "totalBytes": 115652,
+      "seamDist": 16
+    },
+    "cyberpunk": {
+      "samples": [
+        {
+          "frame": 0,
+          "bytes": 7439,
+          "ahash": "0050e5e0f0f07000"
+        },
+        {
+          "frame": 4,
+          "bytes": 6562,
+          "ahash": "00000070f0f87020"
+        },
+        {
+          "frame": 8,
+          "bytes": 7504,
+          "ahash": "0002c8f0f4f97000"
+        }
+      ],
+      "totalBytes": 90507,
+      "seamDist": 4
+    }
+  },
+  "text": {
+    "static": {
+      "samples": [
+        {
+          "frame": 0,
+          "bytes": 10412,
+          "ahash": "0000006e00000000"
+        }
+      ],
+      "totalBytes": 10412
+    },
+    "marquee": {
+      "samples": [
+        {
+          "frame": 0,
+          "bytes": 4314,
+          "ahash": "ffffffffffffffff"
+        },
+        {
+          "frame": 9,
+          "bytes": 10412,
+          "ahash": "0000006e00000000"
+        },
+        {
+          "frame": 17,
+          "bytes": 5238,
+          "ahash": "0000000100000000"
+        }
+      ],
+      "totalBytes": 142144
+    },
+    "rainbow": {
+      "samples": [
+        {
+          "frame": 0,
+          "bytes": 14476,
+          "ahash": "0000006e00000000"
+        },
+        {
+          "frame": 9,
+          "bytes": 13893,
+          "ahash": "0000006e00000000"
+        },
+        {
+          "frame": 17,
+          "bytes": 13879,
+          "ahash": "0000006e00000000"
+        }
+      ],
+      "totalBytes": 255158
+    },
+    "blink": {
+      "samples": [
+        {
+          "frame": 0,
+          "bytes": 10412,
+          "ahash": "0000006e00000000"
+        },
+        {
+          "frame": 9,
+          "bytes": 10412,
+          "ahash": "0000006e00000000"
+        },
+        {
+          "frame": 17,
+          "bytes": 4314,
+          "ahash": "ffffffffffffffff"
+        }
+      ],
+      "totalBytes": 144730
+    },
+    "bounce": {
+      "samples": [
+        {
+          "frame": 0,
+          "bytes": 10412,
+          "ahash": "0000006e00000000"
+        },
+        {
+          "frame": 9,
+          "bytes": 10412,
+          "ahash": "0000006e00000000"
+        },
+        {
+          "frame": 17,
+          "bytes": 10479,
+          "ahash": "0000001800000000"
+        }
+      ],
+      "totalBytes": 185246
+    },
+    "typewriter": {
+      "samples": [
+        {
+          "frame": 0,
+          "bytes": 4865,
+          "ahash": "0000000404000000"
+        },
+        {
+          "frame": 9,
+          "bytes": 8192,
+          "ahash": "0000002834000000"
+        },
+        {
+          "frame": 17,
+          "bytes": 9399,
+          "ahash": "0000004874000000"
+        }
+      ],
+      "totalBytes": 135048
+    },
+    "glow": {
+      "samples": [
+        {
+          "frame": 0,
+          "bytes": 10744,
+          "ahash": "0000007e7e000000"
+        },
+        {
+          "frame": 9,
+          "bytes": 10744,
+          "ahash": "0000007e7e000000"
+        },
+        {
+          "frame": 17,
+          "bytes": 10638,
+          "ahash": "0000007e7e000000"
+        }
+      ],
+      "totalBytes": 193486
+    },
+    "wave": {
+      "samples": [
+        {
+          "frame": 0,
+          "bytes": 10362,
+          "ahash": "0000005600000000"
+        },
+        {
+          "frame": 9,
+          "bytes": 10420,
+          "ahash": "0000000610000000"
+        },
+        {
+          "frame": 17,
+          "bytes": 10398,
+          "ahash": "0000001000000000"
+        }
+      ],
+      "totalBytes": 187618
+    }
+  }
+}

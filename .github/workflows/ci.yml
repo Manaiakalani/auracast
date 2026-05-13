@@ -1,0 +1,78 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  audits:
+    name: Build + audits
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: ./web
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+          cache-dependency-path: ./web/package-lock.json
+
+      - name: Install deps
+        run: npm ci
+
+      - name: Build
+        run: npm run build
+
+      - name: Type check
+        run: npm run check
+
+      - name: Install Playwright Chromium
+        run: npx playwright install --with-deps chromium
+
+      - name: Start preview server
+        run: npm run preview -- --host 127.0.0.1 --port 4173 --strictPort > /tmp/preview.log 2>&1 &
+        env:
+          NODE_ENV: production
+
+      - name: Wait for preview server
+        run: |
+          for i in {1..30}; do
+            if curl -kfs https://127.0.0.1:4173/ > /dev/null; then
+              echo "preview up"; exit 0
+            fi
+            sleep 1
+          done
+          echo "preview never started"; cat /tmp/preview.log 2>/dev/null || true; exit 1
+
+      - name: Visual audit + hard assertions
+        env:
+          AUDIT_URL: https://127.0.0.1:4173/
+        run: npm run check:visual
+
+      - name: Pattern content audit (vs baseline)
+        env:
+          AUDIT_URL: https://127.0.0.1:4173/
+        run: npm run check:patterns
+
+      - name: Accessibility audit (axe-core)
+        env:
+          AUDIT_URL: https://127.0.0.1:4173/
+        run: npm run check:a11y
+
+      - name: Upload audit artifacts on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: audit-output
+          path: |
+            /tmp/auracast-audit/audit-shots
+            /tmp/auracast-audit/visuals
+            /tmp/auracast-audit/a11y
+          if-no-files-found: ignore
+          retention-days: 14

@@ -1,0 +1,37 @@
+# Dependencies
+node_modules/
+
+# Build output
+web/dist/
+web/.tmp/
+
+# Test artifacts
+web/test-results/
+web/playwright-report/
+web/screenshots/
+
+# Bluetooth captures (contain device traffic)
+*.btsnoop
+*.pklg
+cap.txt
+cap-extended*
+captured_image*
+captured_transmitted*
+session*.avi
+session*.bin
+
+# Decompiled APKs
+apk-decompiled/
+
+# Python
+__pycache__/
+.venv/
+*.pyc
+
+# Editor / OS
+.DS_Store
+*.bak
+*.orig
+*.swp
+.idea/
+.vscode/
