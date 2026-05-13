@@ -66,7 +66,7 @@
             <span class="state-layer pointer-events-none absolute inset-0 rounded-full bg-on-surface opacity-0 transition-opacity duration-150 ease-m3-standard group-hover/rail:opacity-[0.08] group-focus-visible/rail:opacity-[0.12] group-active/rail:opacity-[0.16]"></span>
             <Icon
               name={d.icon}
-              size={26}
+              size={24}
               filled={active}
               class="relative {active ? 'text-on-secondary-container' : 'text-on-surface-variant'}"
             />

@@ -48,7 +48,7 @@
   let frames: ImageBitmap[] = $state([])
   let currentFrame = 0
   let interval: ReturnType<typeof setInterval> | null = null
-  let state: 'idle' | 'pending' | 'done' | 'failed' = $state('idle')
+  let genState: 'idle' | 'pending' | 'done' | 'failed' = $state('idle')
   let activeHandle: GenerateHandle | null = null
 
   function ensureCtx(): CanvasRenderingContext2D | null {
@@ -87,8 +87,8 @@
   }
 
   async function generate() {
-    if (state === 'pending' || state === 'done') return
-    state = 'pending'
+    if (genState === 'pending' || genState === 'done') return
+    genState = 'pending'
     await acquireSlot()
     try {
       const handle = generatePatternInWorker(pattern.generatorKey, { frames: 4, fps: 4 })
@@ -96,18 +96,18 @@
       const jpegs = await handle.result
       activeHandle = null
       const bitmaps = await Promise.all(
-        jpegs.map(j => createImageBitmap(new Blob([j], { type: 'image/jpeg' })))
+        jpegs.map(j => createImageBitmap(new Blob([j.buffer.slice(j.byteOffset, j.byteOffset + j.byteLength)], { type: 'image/jpeg' })))
       )
       frames = bitmaps
-      state = 'done'
+      genState = 'done'
       drawFrame(0)
       if (animate) startAnimation()
     } catch (e) {
       activeHandle = null
       if (e instanceof PatternCancelledError) {
-        state = 'idle'
+        genState = 'idle'
       } else {
-        state = 'failed'
+        genState = 'failed'
       }
     } finally {
       releaseSlot()
