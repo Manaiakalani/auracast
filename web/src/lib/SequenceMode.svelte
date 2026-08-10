@@ -30,7 +30,7 @@
     >
       Select images…
     </Button>
-    <input bind:this={fileInput} type="file" accept="image/*" multiple onchange={onSelectFiles} disabled={isWriting} class="sr-only" />
+    <input bind:this={fileInput} type="file" accept="image/*" multiple onchange={onSelectFiles} disabled={isWriting} class="sr-only" aria-label="Select image files" />
     {#if selectedFiles.length > 0}
       <span class="text-body-sm text-on-surface-variant">
         <span class="tabular text-on-surface">{selectedFiles.length}</span> images selected

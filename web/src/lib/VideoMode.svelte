@@ -106,7 +106,7 @@
     >
       Select video…
     </Button>
-    <input bind:this={fileInput} type="file" accept="video/*" onchange={onSelectVideo} disabled={isWriting} class="sr-only" />
+    <input bind:this={fileInput} type="file" accept="video/*" onchange={onSelectVideo} disabled={isWriting} class="sr-only" aria-label="Select video file" />
     {#if selectedFile}
       <span class="text-body-sm text-on-surface-variant truncate max-w-[40ch]">{selectedFile.name}</span>
     {/if}

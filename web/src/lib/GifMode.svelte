@@ -235,6 +235,7 @@
     onchange={handleFileSelect}
     disabled={isWriting || busy}
     class="sr-only"
+    aria-label="Choose GIF file"
   />
 
   <Button
