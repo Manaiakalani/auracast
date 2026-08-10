@@ -27,7 +27,7 @@
     >
       Choose image…
     </Button>
-    <input bind:this={fileInput} type="file" accept="image/*" onchange={onSelectFile} disabled={isWriting} class="sr-only" />
+    <input bind:this={fileInput} type="file" accept="image/*" onchange={onSelectFile} disabled={isWriting} class="sr-only" aria-label="Choose image file" />
     {#if selectedFile}
       <span class="text-body-sm text-on-surface-variant truncate max-w-[40ch]">{selectedFile.name}</span>
     {/if}
