@@ -408,6 +408,7 @@ export async function connectE87(log?: (msg: string) => void): Promise<E87Connec
       { namePrefix: 'L8' },
       { namePrefix: 'X9' },
       { namePrefix: 'LED Badge' },
+      { namePrefix: 'E92' },
     ],
     optionalServices: SERVICE_CANDIDATES,
   })
