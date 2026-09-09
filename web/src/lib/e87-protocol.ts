@@ -47,6 +47,12 @@ export type E87Frame = {
 }
 
 export type UploadMode = 'image' | 'images' | 'video' | 'pattern' | 'qr' | 'text' | 'gif'
+export type E87Language = 'zh-CN' | 'en'
+
+const E87_LANGUAGE_CODE: Record<E87Language, number> = {
+  'zh-CN': 0x00,
+  en: 0x01,
+}
 
 export type UploadProgressCallback = (
   bytesSent: number,
@@ -653,6 +659,26 @@ function buildQixFrame(cmd: number, payload: Uint8Array, flag: number): Uint8Arr
   frame[1] = chk
   frame.set(inner, 2)
   return frame
+}
+
+/**
+ * Set the badge UI language via Qix command 0x16.
+ *
+ * E92 captures from ZRun show payload 0x00 for Chinese. AuraCast's original
+ * upload bootstrap hard-coded payload 0x01, which switches the badge to
+ * English. Keep the original AuraCast Qix flag (0x08) and only generate the
+ * payload/checksum dynamically.
+ */
+export async function setLanguageE87(
+  conn: E87Connection,
+  language: E87Language,
+  log: (msg: string) => void,
+): Promise<void> {
+  if (!conn.server?.connected) throw new Error('Device is disconnected.')
+  const code = E87_LANGUAGE_CODE[language]
+  const frame = buildQixFrame(0x16, Uint8Array.of(code), 0x08)
+  log(`Set device language: ${language === 'zh-CN' ? '简体中文' : 'English'} (0x${code.toString(16).padStart(2, '0')})`)
+  await writeChunkTo(conn.controlChar, frame)
 }
 
 function parseQixFrame(raw: Uint8Array): { cmd: number; flag: number; payload: Uint8Array } | null {
@@ -1512,6 +1538,7 @@ export interface UploadOptions {
   conn: E87Connection
   payload: Uint8Array
   uploadMode: UploadMode
+  deviceLanguage?: E87Language
   interChunkDelayMs: number
   cancelRequested: () => boolean
   onProgress: UploadProgressCallback
@@ -1519,7 +1546,16 @@ export interface UploadOptions {
 }
 
 export async function writeFileE87(opts: UploadOptions): Promise<void> {
-  const { conn, payload: jpegBytes, uploadMode, interChunkDelayMs, cancelRequested, onProgress, log } = opts
+  const {
+    conn,
+    payload: jpegBytes,
+    uploadMode,
+    deviceLanguage = 'en',
+    interChunkDelayMs,
+    cancelRequested,
+    onProgress,
+    log,
+  } = opts
   const { writeChar: characteristic, controlChar: controlCharacteristic } = conn
 
   const uploadNotificationQueue: Uint8Array[] = [...conn.notificationQueue]
@@ -1619,7 +1655,7 @@ export async function writeFileE87(opts: UploadOptions): Promise<void> {
     ])
     await writeChunkTo(controlCharacteristic, timePayload)
     await sleep(20)
-    await writeChunkTo(controlCharacteristic, hexToBytes('9E20 0816 0100 01'))
+    await setLanguageE87(conn, deviceLanguage, log)
     await sleep(20)
     await writeChunkTo(controlCharacteristic, hexToBytes('9EB5 0B29 0100 80'))
     await sleep(200)
