@@ -666,8 +666,8 @@ function buildQixFrame(cmd: number, payload: Uint8Array, flag: number): Uint8Arr
  *
  * E92 captures from ZRun show payload 0x00 for Chinese. AuraCast's original
  * upload bootstrap hard-coded payload 0x01, which switches the badge to
- * English. Keep the original AuraCast Qix flag (0x08) and only generate the
- * payload/checksum dynamically.
+ * English. Generate the flag from the connection's Qix sequence so this
+ * command participates in the same sequence stream as other Qix requests.
  */
 export async function setLanguageE87(
   conn: E87Connection,
@@ -676,8 +676,10 @@ export async function setLanguageE87(
 ): Promise<void> {
   if (!conn.server?.connected) throw new Error('Device is disconnected.')
   const code = E87_LANGUAGE_CODE[language]
-  const frame = buildQixFrame(0x16, Uint8Array.of(code), 0x08)
-  log(`Set device language: ${language === 'zh-CN' ? '简体中文' : 'English'} (0x${code.toString(16).padStart(2, '0')})`)
+  const seq = nextQixSeq(conn)
+  const flag = ((seq & 0x0f) << 3) | 0x02
+  const frame = buildQixFrame(0x16, Uint8Array.of(code), flag)
+  log(`Set device language: ${language === 'zh-CN' ? '简体中文' : 'English'} (0x${code.toString(16).padStart(2, '0')}, seq=${seq})`)
   await writeChunkTo(conn.controlChar, frame)
 }
 

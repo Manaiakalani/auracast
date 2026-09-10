@@ -178,6 +178,12 @@
     return typeof value === 'string' ? value : fallback
   }
 
+  function browserDeviceLanguage(): E87Language {
+    if (typeof navigator === 'undefined') return 'en'
+    const locale = navigator.languages?.[0] ?? navigator.language
+    return locale?.toLowerCase().startsWith('zh') ? 'zh-CN' : 'en'
+  }
+
   const saved = loadSettings()
 
   const debugMode = typeof window !== 'undefined' && new URLSearchParams(window.location.search).has('debug')
@@ -210,7 +216,11 @@
   let isWriting = $state(false)
   let cancelRequested = $state(false)
   let interChunkDelayMs = $state(n(saved.interChunkDelayMs, 0))
-  let deviceLanguage: E87Language = $state(saved.deviceLanguage === 'en' ? 'en' : 'zh-CN')
+  let deviceLanguage: E87Language = $state(
+    saved.deviceLanguage === 'zh-CN' || saved.deviceLanguage === 'en'
+      ? saved.deviceLanguage
+      : browserDeviceLanguage(),
+  )
   let languageMenuOpen = $state(false)
 
   let status = $state(hasWebBluetooth
