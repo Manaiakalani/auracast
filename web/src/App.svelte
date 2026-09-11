@@ -23,7 +23,9 @@
     stopBrowseE87,
     getScreenInfoE87,
     getBrightnessE87,
+    setLanguageE87,
     type E87Connection,
+    type E87Language,
     type UploadMode,
     type E87SmallFileEntry,
     type E87FileBrowseEntry,
@@ -148,6 +150,7 @@
     selectedPatternId?: string
     patternOutputMode?: 'still' | 'video'
     animateThumbnails?: boolean
+    deviceLanguage?: E87Language
   }
 
   type ColorScheme = 'light' | 'dark' | 'system'
@@ -173,6 +176,12 @@
 
   function s(value: unknown, fallback: string): string {
     return typeof value === 'string' ? value : fallback
+  }
+
+  function browserDeviceLanguage(): E87Language {
+    if (typeof navigator === 'undefined') return 'en'
+    const locale = navigator.languages?.[0] ?? navigator.language
+    return locale?.toLowerCase().startsWith('zh') ? 'zh-CN' : 'en'
   }
 
   const saved = loadSettings()
@@ -207,6 +216,12 @@
   let isWriting = $state(false)
   let cancelRequested = $state(false)
   let interChunkDelayMs = $state(n(saved.interChunkDelayMs, 0))
+  let deviceLanguage: E87Language = $state(
+    saved.deviceLanguage === 'zh-CN' || saved.deviceLanguage === 'en'
+      ? saved.deviceLanguage
+      : browserDeviceLanguage(),
+  )
+  let languageMenuOpen = $state(false)
 
   let status = $state(hasWebBluetooth
     ? 'Disconnected'
@@ -727,6 +742,22 @@
     }, 300)
   }
 
+  async function applyDeviceLanguage(): Promise<void> {
+    if (!conn?.server?.connected) {
+      status = 'Connect the badge before applying device language.'
+      log(status)
+      return
+    }
+    try {
+      await setLanguageE87(conn, deviceLanguage, log)
+      status = `Device language applied: ${deviceLanguage === 'zh-CN' ? '简体中文' : 'English'}`
+      log(status)
+    } catch (error) {
+      status = `Failed to set device language: ${(error as Error).message}`
+      log(status)
+    }
+  }
+
   // ─── File handling ───
 
   function revokePreviewUrl() {
@@ -796,6 +827,7 @@
       selectedPatternId: selectedPattern?.id,
       patternOutputMode,
       animateThumbnails,
+      deviceLanguage,
     }
     if (persistTimer) clearTimeout(persistTimer)
     persistTimer = setTimeout(() => {
@@ -1703,6 +1735,7 @@
         conn,
         payload,
         uploadMode: 'image',
+        deviceLanguage,
         interChunkDelayMs,
         cancelRequested: () => cancelRequested,
         log,
@@ -1844,6 +1877,7 @@
         conn: conn!,
         payload,
         uploadMode: uploadModeForDevice,
+        deviceLanguage,
         interChunkDelayMs,
         cancelRequested: () => cancelRequested,
         onProgress: (bytesSent, totalBytes, chunksSent, totalChunks) => {
@@ -1918,7 +1952,11 @@
   }
 </script>
 
-<svelte:window onkeydown={(e) => { if (e.key === 'Escape' && helpOpen) helpOpen = false }} />
+<svelte:window onkeydown={(e) => {
+  if (e.key !== 'Escape') return
+  if (helpOpen) helpOpen = false
+  if (languageMenuOpen) languageMenuOpen = false
+}} />
 <svelte:body class:overflow-hidden={helpOpen} />
 
 <!-- Subtle circuit-board texture wash - sits behind everything, opacity 6% -->
@@ -1962,6 +2000,81 @@
             oninput={debouncedSetBrightness}
             class="w-20 h-1 accent-[var(--md-sys-color-primary)] cursor-pointer" />
           <span class="text-label-sm tabular-nums w-7 text-right">{brightnessLevel}%</span>
+        </div>
+      {/if}
+      {#if hasWebBluetooth}
+        <div class="relative">
+          <button
+            type="button"
+            class="h-9 px-2.5 sm:px-3 inline-flex items-center gap-1.5 rounded-full bg-surface-container-high text-on-surface hover:bg-surface-container-highest transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+            aria-label="Device language"
+            aria-haspopup="menu"
+            aria-expanded={languageMenuOpen}
+            onclick={() => languageMenuOpen = !languageMenuOpen}
+          >
+            <M3Icon name="language" size={18} class="text-primary" />
+            <span class="hidden sm:inline text-label-md">
+              {deviceLanguage === 'zh-CN' ? '简体中文' : 'English'}
+            </span>
+            <M3Icon name={languageMenuOpen ? 'arrow_drop_up' : 'arrow_drop_down'} size={18} class="hidden sm:block text-on-surface-variant" />
+          </button>
+
+          {#if languageMenuOpen}
+            <div
+              class="absolute right-0 top-11 z-[80] w-64 rounded-2xl border border-outline-variant bg-surface-container-high p-2 shadow-elev-3"
+              role="menu"
+              aria-label="Device language"
+            >
+              <div class="px-3 pt-2 pb-1">
+                <div class="text-title-sm font-semibold text-on-surface">Device language</div>
+                <div class="text-label-sm text-on-surface-variant">Used for Web Bluetooth uploads.</div>
+              </div>
+
+              <button
+                type="button"
+                class="w-full h-10 px-3 rounded-xl flex items-center gap-2 text-left text-label-lg hover:bg-on-surface/[0.08] transition-colors {deviceLanguage === 'zh-CN' ? 'bg-secondary-container text-on-secondary-container' : 'text-on-surface'}"
+                role="menuitemradio"
+                aria-checked={deviceLanguage === 'zh-CN'}
+                onclick={() => deviceLanguage = 'zh-CN'}
+              >
+                <M3Icon name={deviceLanguage === 'zh-CN' ? 'check' : 'language'} size={18} />
+                <span>简体中文</span>
+              </button>
+
+              <button
+                type="button"
+                class="w-full h-10 px-3 rounded-xl flex items-center gap-2 text-left text-label-lg hover:bg-on-surface/[0.08] transition-colors {deviceLanguage === 'en' ? 'bg-secondary-container text-on-secondary-container' : 'text-on-surface'}"
+                role="menuitemradio"
+                aria-checked={deviceLanguage === 'en'}
+                onclick={() => deviceLanguage = 'en'}
+              >
+                <M3Icon name={deviceLanguage === 'en' ? 'check' : 'language'} size={18} />
+                <span>English</span>
+              </button>
+
+              <div class="my-2 h-px bg-outline-variant"></div>
+
+              <M3Button
+                variant="tonal"
+                size="sm"
+                icon="translate"
+                fullWidth
+                disabled={!conn?.server?.connected || isWriting}
+                onclick={async () => {
+                  await applyDeviceLanguage()
+                  languageMenuOpen = false
+                }}
+              >
+                Apply to badge now
+              </M3Button>
+
+              {#if !conn?.server?.connected}
+                <div class="px-3 pt-2 pb-1 text-label-sm text-on-surface-variant">
+                  Connect the badge to apply immediately. Uploads will use this preference automatically.
+                </div>
+              {/if}
+            </div>
+          {/if}
         </div>
       {/if}
       {#if (conn?.server?.connected || httpConn)}
