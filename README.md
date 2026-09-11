@@ -21,7 +21,7 @@
 >
 > The round LED smart badges sold on **Amazon**, **AliExpress**, **Temu**, and **TikTok Shop** as:
 >
-> **E87** · **L8** · **X9** · **LED Smart Badge** · **Anime Smart Badge** · **Anime LED Pin** · **Aura Badge** · **DIY Light Up Pin** · **Wearable Display Pin** · **Round LED Name Tag** · **Smart LED Bluetooth Pin** · **Akinokai Display Pin** · **384x384 Round Pin** · **Programmable LED Badge** · **Custom Image Pin** · **Anime LED Lapel Pin** · **HiBadge** · **Bluetooth LED Pin** · **Round OLED Badge**
+> **E87** · **E92** · **L8** · **X9** · **LED Smart Badge** · **Anime Smart Badge** · **Anime LED Pin** · **Aura Badge** · **DIY Light Up Pin** · **Wearable Display Pin** · **Round LED Name Tag** · **Smart LED Bluetooth Pin** · **Akinokai Display Pin** · **384x384 Round Pin** · **Programmable LED Badge** · **Custom Image Pin** · **Anime LED Lapel Pin** · **HiBadge** · **Bluetooth LED Pin** · **Round OLED Badge**
 >
 > ...all use the same Jieli BLE chip and speak the same protocol. If you have one of these, **AuraCast works with it.**
 >
@@ -33,7 +33,7 @@
 
 1. **Press the side button** on your badge to wake it up
 2. **Open AuraCast** in Chrome, Edge, Brave, Arc, or Opera — [launch it here](https://manaiakalani.github.io/auracast/)
-3. **Click Connect** and pick your badge (`E87` or `L8...`) from the Bluetooth picker
+3. **Click Connect** and pick your badge (`E87`, `E92`, or `L8...`) from the Bluetooth picker
 4. **Drag in an image**, pick a pattern, type some text, or import a GIF — then click **Send**
 
 That's it. The image appears on your badge in seconds.
@@ -95,7 +95,7 @@ That's it. The image appears on your badge in seconds.
 
 If your badge is:
 - **Round** (35-45 mm diameter)
-- Connects via **Bluetooth Low Energy** (advertises as `E87`, `L8`, `X9`, or `LED Badge`)
+- Connects via **Bluetooth Low Energy** (advertises as `E87`, `E92`, `L8`, `X9`, or `LED Badge`)
 - Came with the **Zrun** / **HiBadge** / **LED Badge** app
 - Has a **full-color OLED/LCD display** (not a monochrome scrolling text badge)
 
@@ -215,7 +215,7 @@ Built on their shoulders. Painted in Material 3. Shipped over MJPEG.
 **[AuraCast](https://manaiakalani.github.io/auracast/)** — the open badge uploader
 
 <sub>
-Keywords: E87 smart badge · L8 LED badge · X9 LED pin · round LED badge · anime badge app · LED smart pin · Zrun alternative · Zrun replacement · HiBadge alternative · Web Bluetooth badge · BLE LED badge · programmable LED pin · round OLED badge · anime LED lapel pin · Akinokai badge · Jieli badge · custom badge uploader · AuraCast
+Keywords: E87 smart badge · E92 smart badge · L8 LED badge · X9 LED pin · round LED badge · anime badge app · LED smart pin · Zrun alternative · Zrun replacement · HiBadge alternative · Web Bluetooth badge · BLE LED badge · programmable LED pin · round OLED badge · anime LED lapel pin · Akinokai badge · Jieli badge · custom badge uploader · AuraCast
 </sub>
 
 </div>
