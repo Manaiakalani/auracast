@@ -4,7 +4,7 @@
    * encode as MJPEG AVI for the badge.
    */
   import { buildMjpgAvi } from '../avi-builder'
-  import { SIZE, HALF, RADIUS, TAU } from '../patterns/helpers'
+  import { HALF, RADIUS, TAU } from '../patterns/helpers'
   import { encodeJpeg } from './jpeg-encoder-client'
   import { fitJpegFramesToBudget, MAX_UPLOAD_BYTES, E87_IMAGE_WIDTH, E87_IMAGE_HEIGHT } from './image-processing'
   import { formatBytes } from './utils'
@@ -89,23 +89,43 @@
   }
 
   async function decodeGifFrames(file: File): Promise<DecodedGif> {
-    const canvas = new OffscreenCanvas(E87_IMAGE_WIDTH, E87_IMAGE_HEIGHT)
-    const ctx = canvas.getContext('2d', { willReadFrequently: true })!
-
-    // Use ImageDecoder API (Chrome/Edge - the only browsers with Web Bluetooth)
-    if ('ImageDecoder' in globalThis) {
-      return decodeWithImageDecoder(file, canvas, ctx)
+    // ImageDecoder is what decodes every frame. createImageBitmap on a GIF
+    // returns frame 0 only, which used to upload as a fake 10 fps still.
+    if (!('ImageDecoder' in globalThis)) {
+      throw new Error('This browser cannot decode an animated GIF. Open AuraCast in Chrome, Edge, Brave, or Arc.')
     }
-
-    // Fallback: decode via img element + createImageBitmap (unlikely path)
-    return decodeWithImageBitmap(file, canvas, ctx)
+    return decodeWithImageDecoder(file)
   }
 
-  async function decodeWithImageDecoder(
-    file: File,
-    canvas: OffscreenCanvas,
+  function drawGifFrame(
     ctx: OffscreenCanvasRenderingContext2D,
-  ): Promise<DecodedGif> {
+    source: CanvasImageSource,
+    srcW: number,
+    srcH: number,
+  ): void {
+    const minDim = Math.min(srcW, srcH)
+    const sx = (srcW - minDim) / 2
+    const sy = (srcH - minDim) / 2
+    ctx.clearRect(0, 0, E87_IMAGE_WIDTH, E87_IMAGE_HEIGHT)
+    ctx.fillStyle = '#000'
+    ctx.fillRect(0, 0, E87_IMAGE_WIDTH, E87_IMAGE_HEIGHT)
+    ctx.save()
+    ctx.beginPath()
+    ctx.arc(HALF, HALF, RADIUS, 0, TAU)
+    ctx.clip()
+    ctx.drawImage(source, sx, sy, minDim, minDim, 0, 0, E87_IMAGE_WIDTH, E87_IMAGE_HEIGHT)
+    ctx.restore()
+    ctx.globalCompositeOperation = 'destination-in'
+    ctx.beginPath()
+    ctx.arc(HALF, HALF, RADIUS, 0, TAU)
+    ctx.fill()
+    ctx.globalCompositeOperation = 'source-over'
+  }
+
+  async function decodeWithImageDecoder(file: File): Promise<DecodedGif> {
+    const canvas = new OffscreenCanvas(E87_IMAGE_WIDTH, E87_IMAGE_HEIGHT)
+    const ctx = canvas.getContext('2d', { willReadFrequently: true })
+    if (!ctx) throw new Error('Could not create a canvas for the GIF.')
     const objectUrl = URL.createObjectURL(file)
     try {
       const response = await fetch(objectUrl)
@@ -122,25 +142,11 @@
           const result = await decoder.decode({ frameIndex: i })
           const vf = result.image
           try {
-            totalDurationUs += vf.duration ?? 100_000
+            // A GIF delay of 0 means "use the default", which is 100 ms.
+            const d = vf.duration
+            totalDurationUs += d ? d : 100_000
 
-            // Draw frame to canvas with circular mask
-            ctx.clearRect(0, 0, E87_IMAGE_WIDTH, E87_IMAGE_HEIGHT)
-            ctx.fillStyle = '#000'
-            ctx.fillRect(0, 0, E87_IMAGE_WIDTH, E87_IMAGE_HEIGHT)
-            ctx.save()
-            ctx.beginPath()
-            ctx.arc(HALF, HALF, RADIUS, 0, TAU)
-            ctx.clip()
-            ctx.drawImage(vf, 0, 0, E87_IMAGE_WIDTH, E87_IMAGE_HEIGHT)
-            ctx.restore()
-
-            // Apply circular mask (black outside circle)
-            ctx.globalCompositeOperation = 'destination-in'
-            ctx.beginPath()
-            ctx.arc(HALF, HALF, RADIUS, 0, TAU)
-            ctx.fill()
-            ctx.globalCompositeOperation = 'source-over'
+            drawGifFrame(ctx, vf, vf.displayWidth, vf.displayHeight)
 
             const imgData = ctx.getImageData(0, 0, E87_IMAGE_WIDTH, E87_IMAGE_HEIGHT)
             const jpeg = await encodeJpeg(
@@ -168,43 +174,6 @@
     }
   }
 
-  async function decodeWithImageBitmap(
-    file: File,
-    canvas: OffscreenCanvas,
-    ctx: OffscreenCanvasRenderingContext2D,
-  ): Promise<DecodedGif> {
-    // Simple fallback: treat as single-frame image
-    const bitmap = await createImageBitmap(file, {
-      resizeWidth: E87_IMAGE_WIDTH,
-      resizeHeight: E87_IMAGE_HEIGHT,
-    })
-
-    ctx.clearRect(0, 0, E87_IMAGE_WIDTH, E87_IMAGE_HEIGHT)
-    ctx.fillStyle = '#000'
-    ctx.fillRect(0, 0, E87_IMAGE_WIDTH, E87_IMAGE_HEIGHT)
-    ctx.save()
-    ctx.beginPath()
-    ctx.arc(HALF, HALF, RADIUS, 0, TAU)
-    ctx.clip()
-    ctx.drawImage(bitmap, 0, 0, E87_IMAGE_WIDTH, E87_IMAGE_HEIGHT)
-    ctx.restore()
-
-    ctx.globalCompositeOperation = 'destination-in'
-    ctx.beginPath()
-    ctx.arc(HALF, HALF, RADIUS, 0, TAU)
-    ctx.fill()
-    ctx.globalCompositeOperation = 'source-over'
-
-    const imgData = ctx.getImageData(0, 0, E87_IMAGE_WIDTH, E87_IMAGE_HEIGHT)
-    const jpeg = await encodeJpeg(
-      E87_IMAGE_WIDTH,
-      E87_IMAGE_HEIGHT,
-      new Uint8Array(imgData.data.buffer, imgData.data.byteOffset, imgData.data.byteLength),
-      85,
-    )
-    bitmap.close()
-    return { jpegFrames: [jpeg], fps: 10 }
-  }
 </script>
 
 <div class="flex flex-col gap-5">

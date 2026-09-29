@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="docs/screenshots/hero-dark.png" alt="AuraCast - Pattern picker with 29 animated patterns" width="800" />
+<img src="docs/screenshots/hero-dark.png" alt="AuraCast - Pattern picker with 30 animated patterns" width="800" />
 
 # ✦ AuraCast
 
@@ -33,12 +33,12 @@
 
 1. **Press the side button** on your badge to wake it up
 2. **Open AuraCast** in Chrome, Edge, Brave, Arc, or Opera — [launch it here](https://manaiakalani.github.io/auracast/)
-3. **Click Connect** and pick your badge (`E87`, `E92`, or `L8...`) from the Bluetooth picker
+3. **Click Connect** and pick your badge (`E87`, `E92`, `L8`, or `X9`) from the Bluetooth picker
 4. **Drag in an image**, pick a pattern, type some text, or import a GIF — then click **Send**
 
 That's it. The image appears on your badge in seconds.
 
-> **iPhone / Safari / Firefox?** Web Bluetooth isn't available in those browsers. A Python relay is planned but not yet included. For now, use a Chromium-based browser (Chrome, Edge, Brave, Arc, Opera) on a supported platform. See [Browser Support](#browser-support).
+> **iPhone / Safari / Firefox?** Those browsers cannot open Bluetooth themselves. The Python relay in [`relay/`](relay/README.md) runs on a computer that has a radio, and the phone uses that computer. The relay was checked against a simulated badge, not a physical one. See [Browser Support](#browser-support).
 
 ---
 
@@ -46,10 +46,10 @@ That's it. The image appears on your badge in seconds.
 
 | | Feature | Details |
 |---|---|---|
-| ✨ | **29 animated patterns** | Matrix Rain, Aurora Ribbons, Fireworks, Clock Face, Flow Field, Reaction Diffusion, Voronoi Crystals, Kaleidoscope, Danmaku, and more. All procedurally generated as seamless loops. |
-| 🖼️ | **Image upload** | Drag-and-drop JPEG, PNG, WebP, or HEIC. Auto-cropped and fitted to the badge's circular 368x368 OLED display. |
+| ✨ | **30 animated patterns** | Matrix Rain, Aurora Ribbons, Fireworks, Clock Face, Flow Field, Reaction Diffusion, Painted Base, Voronoi Crystals, Kaleidoscope, Danmaku, and more. Generated in the browser as looping clips. |
+| 🖼️ | **Image upload** | Drag-and-drop JPEG, PNG, or WebP. Auto-cropped and fitted to the badge's circular 368x368 display. |
 | 🎞️ | **GIF import** | Drop an animated GIF — frames are decoded, circular-cropped, and packed as a looping MJPEG animation on the badge. |
-| 🔤 | **Text effects** | Scrolling marquee, static text, rainbow, glitch, and danmaku modes. Custom colors, fonts, sizes. |
+| 🔤 | **Text effects** | Static, marquee, rainbow, blink, bounce, typewriter, glow, and wave. Custom colors and fonts. |
 | 🎬 | **Video clips** | Trim MP4/MOV clips to fit the badge's 900 KB storage. Frame-by-frame preview before sending. |
 | 📱 | **QR codes** | High-contrast circular QR codes that scan right off the badge. |
 | 🖼️ | **Image sequences** | Multi-frame slideshows that loop on-device. |
@@ -57,7 +57,7 @@ That's it. The image appears on your badge in seconds.
 | 🔆 | **Brightness control** | Adjust badge screen brightness via slider. |
 | 🩺 | **Diagnostics** | One-click connection probe for troubleshooting. |
 | 🌗 | **Material 3 design** | Dark/light theme with M3 Expressive design tokens. |
-| 📲 | **PWA install** | Install as a home-screen app on any device. |
+| 📲 | **PWA install** | Home-screen install from Chromium on HTTPS. The relay's plain HTTP address on a phone can skip the service worker. The page still runs. |
 | 🔒 | **Fully private** | Zero analytics. Zero cookies. Zero tracking. Zero network requests beyond your own badge. |
 
 <div align="center">
@@ -67,8 +67,8 @@ That's it. The image appears on your badge in seconds.
 <td align="center"><img src="docs/screenshots/desktop-text.png" width="380" alt="Text mode" /></td>
 </tr>
 <tr>
-<td align="center">Pattern mode — 29 animated loops</td>
-<td align="center">Text mode — scrolling, glitch, rainbow</td>
+<td align="center">Pattern mode — 30 animated loops</td>
+<td align="center">Text mode: marquee, rainbow, typewriter</td>
 </tr>
 <tr>
 <td align="center"><img src="docs/screenshots/desktop-image.png" width="380" alt="Image upload" /></td>
@@ -99,9 +99,9 @@ If your badge is:
 - Came with the **Zrun** / **HiBadge** / **LED Badge** app
 - Has a **full-color OLED/LCD display** (not a monochrome scrolling text badge)
 
-...it almost certainly works. All these listings use the same **Jieli BR23** chipset.
+...it almost certainly works. All these listings use the same **Jieli BR23** chipset. Some listings say 384x384. AuraCast writes a 368x368 circle, which is the size this firmware displays.
 
-> **Not supported:** Square scrolling-text badges (64x16, 32x8 pixel) use a different protocol entirely. See [badgemagic](https://github.com/jnesselr/badge_magic) for those.
+> **Not supported:** Square and rectangular scrolling-text badges (the old note cited 64x16 and 32x8 panels) use a different protocol. AuraCast does not speak it. The badge_magic repository this page used to link is gone, and there is no maintained project that clearly covers those two sizes. The closest living tools are for a different family, 11x44 and 12x48 LED name badges: [led-name-badge-ls32](https://github.com/fossasia/led-name-badge-ls32) and [Badge Magic](https://github.com/fossasia/badgemagic-app). They do not drive E87, E92, L8, or X9 round badges. Do not flash that firmware onto a round badge.
 
 ---
 
@@ -110,17 +110,19 @@ If your badge is:
 | Browser | Platform | Method |
 |---|---|---|
 | Chrome / Edge / Brave / Arc / Opera | Windows, macOS, Linux, Android, ChromeOS | Direct Web Bluetooth |
-| Safari | macOS, iOS, iPadOS | Via Python relay (Wi-Fi) |
-| Firefox | All | Via Python relay (Wi-Fi) |
-| Chrome on iOS | iOS | Via Python relay (iOS Chrome = WebKit) |
+| Safari | macOS, iOS, iPadOS | Python relay on a computer with Bluetooth |
+| Firefox | All | Python relay on a computer with Bluetooth |
+| Chrome on iOS | iOS | Python relay (iOS Chrome is WebKit; the phone uses the computer's radio) |
 
-### Python relay (for Safari / Firefox / iPhone)
+### Browsers without Web Bluetooth
 
-> **Note:** The Python relay is planned but not yet included in this repository.
-> For now, only browsers with native Web Bluetooth support (Chrome, Edge, Brave,
-> Arc, Opera on desktop and Android) can communicate directly with the badge.
-> Safari, Firefox, and iOS Chrome users should use a Chromium-based browser on a
-> supported platform.
+Safari, Firefox, and iOS Chrome cannot open a Bluetooth connection to the badge. [`relay/`](relay/README.md) is a small Python bridge for those browsers:
+
+1. On a computer with Bluetooth: `cd relay && python3 -m pip install -r requirements.txt && python3 -m auracast_relay`
+2. For an iPhone, add `--lan` and open the Wi-Fi address the relay prints. The phone does not talk to the badge. The computer's radio does. `--lan` has no password, so use a network you trust. That address is plain HTTP, so iOS may not install the service worker. Add to Home Screen from a Chromium browser on HTTPS when you want the installed app. The relay page itself still loads.
+3. `cd web && npm run build` once so the relay can serve `web/dist`. On the same Mac, `npm run dev` proxies `/api` to `127.0.0.1:8787`. Restart the dev server if it was already running when that proxy was added.
+
+The page calls `GET /api/status`, `POST /api/blob`, `POST /api/cancel`, `GET /api/diagnostics`, and `POST /api/cache/bust`. The upload state machine was checked against a simulated badge. It has not been tried on a physical badge. Chrome, Edge, Brave, Arc, and Opera on desktop or Android still connect directly and do not need the relay.
 
 ---
 
@@ -141,6 +143,18 @@ npm run dev
 npm run build
 ```
 
+### Python relay (Safari, Firefox, iPhone)
+
+```bash
+# The block above leaves you in web/. Step back to the relay.
+cd ../relay
+python3 -m pip install -r requirements.txt
+python3 -m unittest discover -s tests -v   # simulated badge, no radio
+python3 -m auracast_relay                  # or --lan for a phone
+```
+
+Build `web/dist` first if you want the relay to serve the app. See [relay/README.md](relay/README.md). The unittest command talks to a simulated badge. A physical badge has not been used.
+
 ### Project Structure
 
 ```
@@ -149,11 +163,12 @@ auracast/
 ├── PROTOCOL.md              ← Full BLE protocol reverse-engineering
 ├── DESIGN.md                ← Brand + design system spec
 ├── LICENSE                  ← MIT License
+├── relay/                   ← Python BLE bridge for Safari, Firefox, iPhone
 ├── web/                     ← Svelte 5 web app
 │   ├── src/
 │   │   ├── App.svelte               Main app shell
 │   │   ├── lib/                     Components, protocol, modes
-│   │   ├── patterns/                29 procedural pattern generators
+│   │   ├── patterns/                30 procedural pattern generators
 │   │   └── ...
 │   └── README.md                    Web-specific build details
 ├── protocol-understanding/  ← Raw BLE captures + analysis
@@ -166,9 +181,9 @@ auracast/
 
 | Zrun pain point | AuraCast |
 |---|---|
-| iOS Bluetooth permissions fail silently | Standard Web Bluetooth or Wi-Fi relay |
+| iOS Bluetooth permissions fail silently | Web Bluetooth in Chromium, or the Python relay for Safari and iPhone |
 | Crashes on uploads over ~200 KB | Streaming uploader with retries, tested to 900 KB |
-| Fills flash storage, refuses new uploads | Single-slot overwrite — always room for next upload |
+| Fills flash storage, refuses new uploads | Clips are fitted under 900 KB. Clear the gallery in Zrun if older files fill it. |
 | Locked to whichever app the seller bundled | One app for every rebrand of the same chipset |
 | Ads, account signup, telemetry | Zero ads, zero tracking, zero accounts, fully local |
 | Closed source | MIT-licensed, fully auditable, PRs welcome |

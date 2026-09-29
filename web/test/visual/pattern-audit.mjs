@@ -1,7 +1,7 @@
 /**
  * Pattern + text generator content audit.
  *
- * Renders every pattern (12) and text effect (8) via the in-page
+ * Renders every pattern and text effect (8) via the in-page
  * __AURACAST_PATTERNS__ / __AURACAST_TEXT__ debug hooks, captures sample
  * frames as 368x368 JPEGs and 3x nearest-neighbour upscaled PNGs for
  * visual review, and writes a manifest with size + perceptual fingerprint.
@@ -67,7 +67,7 @@ const ctx = await browser.newContext({
   deviceScaleFactor: 2,
 })
 const page = await ctx.newPage()
-await page.goto(URL, { waitUntil: 'networkidle' })
+await page.goto(URL, { waitUntil: 'domcontentloaded' })
 await page.waitForTimeout(800)
 await page.click('button[aria-label="Patterns"]'); await page.waitForTimeout(500)
 await page.click('button[aria-label="Text"]'); await page.waitForTimeout(800)
@@ -108,11 +108,11 @@ const writeImages = mode !== 'check'
 
 // Patterns
 const patternIds = await page.evaluate(() => window.__AURACAST_PATTERNS__.map((p) => p.id))
-// Skip seam test for these:
-// - Ping-pong patterns loop by mirroring; their phase=0 ≠ phase=1 by design.
-// - Stochastic patterns (matrix, game-of-life, braille) use randomised column
-//   speeds or cellular automata that don't guarantee mathematical periodicity.
-const SEAM_SKIP = new Set(['spirals', 'campus-9', 'matrix', 'gameoflife', 'braille'])
+// Braille is three integer wave cycles, so the join is periodic. The
+// 8x8 hash of a full frame of glyphs moves more than the seam tolerance
+// on a single step, which is noise rather than a rewind. Spirals now
+// turn forward on integer cycles and are checked with the others.
+const SEAM_SKIP = new Set(['braille'])
 const SEAM_TOLERANCE = 10  // max Hamming bits between adjacent frames at loop point
 
 for (const id of patternIds) {

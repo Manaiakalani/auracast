@@ -19,6 +19,16 @@ export default defineConfig({
   optimizeDeps: {
     include: ['buffer', 'jpeg-js'],
   },
+  server: {
+    // Safari and Firefox on this machine can use the dev UI while the
+    // Python relay owns Bluetooth. The relay listens on 127.0.0.1:8787.
+    proxy: {
+      '/api': {
+        target: 'http://127.0.0.1:8787',
+        changeOrigin: true,
+      },
+    },
+  },
   build: {
     rollupOptions: {
       output: {

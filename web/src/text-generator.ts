@@ -264,11 +264,6 @@ export async function generateTextFrames(opts: TextOptions): Promise<Uint8Array[
       case 'typewriter': {
         const text = opts.text || ' '
         const fit2 = typewriterFit ?? fit
-        // Two-thirds reveal, one-third hold on the full text.
-        const t = Math.min(1, phase / 0.66)
-        const shown = Math.floor(t * text.length)
-        const visible = text.slice(0, shown)
-        const cursorOn = (Math.floor(phase * totalFrames * 2) % 2 === 0)
         // Anchor the typed run to a fixed left edge so revealed glyphs don't
         // jitter horizontally as more characters appear.
         ctx.font = `${opts.fontWeight} ${fit2.size}px ${opts.fontFamily}`
@@ -277,7 +272,20 @@ export async function generateTextFrames(opts: TextOptions): Promise<Uint8Array[
         ctx.textAlign = 'left'
         ctx.textBaseline = 'middle'
         ctx.fillStyle = opts.color
+        // One frame is a still of the finished line. A loop starts blank,
+        // reveals through 55%, holds through 90%, then goes blank again so
+        // the last frame matches frame 0. phase * totalFrames is `f`, so the
+        // old cursor test was always even and the caret never blinked.
+        if (totalFrames === 1) {
+          ctx.fillText(text, startX, HALF)
+          break
+        }
+        if (phase === 0 || phase >= 0.9) break
+        const reveal = phase <= 0.55 ? phase / 0.55 : 1
+        const shown = Math.min(text.length, Math.floor(reveal * text.length))
+        const visible = text.slice(0, shown)
         ctx.fillText(visible, startX, HALF)
+        const cursorOn = Math.floor(f / 2) % 2 === 0
         if (cursorOn) {
           const visW = ctx.measureText(visible).width
           ctx.fillText('▌', startX + visW, HALF)

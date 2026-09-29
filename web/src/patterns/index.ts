@@ -17,6 +17,7 @@ import {
 } from './abstract'
 import { generateRadarSweep, generateArcRadar, generateArcRadarHd } from './sci-fi'
 import { generateClockFace, generateFireworks, generatePerlinFlowField, generateReactionDiffusion } from './generative'
+import { generatePaintedBase } from './scenic'
 import {
   generateBeskarSigil,
   generateMandoCompass,
@@ -59,4 +60,5 @@ export const GENERATORS: Record<string, (opts: PatternOptions) => Promise<Uint8A
   fireworks: generateFireworks,
   perlinFlowField: generatePerlinFlowField,
   reactionDiffusion: generateReactionDiffusion,
+  paintedBase: generatePaintedBase,
 }

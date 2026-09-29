@@ -2,7 +2,7 @@ import { SIZE, HALF, RADIUS, TAU, createCanvas, clear, circularMask, toJpeg, mul
 import type { PatternOptions } from './helpers'
 
 // ===================================================================
-// 1. Clock Face - phase-based analog clock (1 full second-hand sweep)
+// 1. Clock Face - 10:10 pose, one full second-hand sweep
 // ===================================================================
 
 export async function generateClockFace(opts: PatternOptions): Promise<Uint8Array[]> {
@@ -10,16 +10,15 @@ export async function generateClockFace(opts: PatternOptions): Promise<Uint8Arra
   const frames: Uint8Array[] = []
   const primary = '#00f2ff'
 
-  // Fixed reference: 10:10:00 (classic watch display pose)
-  const baseHr = 10 + 10 / 60
-  const baseMin = 10
+  // Hour and minute stay at the classic 10:10 pose. Advancing them across
+  // the clip rewound both hands when the loop joined. A baked frame list
+  // cannot follow the wall clock. The second hand does exactly one turn.
+  const hr = 10 + 10 / 60
+  const min = 10
 
   for (let f = 0; f < opts.frames; f++) {
-    const phase = f / opts.frames
-    // Second hand makes exactly 1 full revolution per loop (integer multiplier)
+    const phase = opts.frames <= 1 ? 0 : f / opts.frames
     const sec = phase * 60
-    const min = baseMin + sec / 60
-    const hr = baseHr + min / 720
 
     clear(ctx, '#0a0a0f')
 
@@ -55,6 +54,22 @@ export async function generateClockFace(opts: PatternOptions): Promise<Uint8Arra
     ctx.lineTo(HALF + Math.cos(ma) * RADIUS * 0.72, HALF + Math.sin(ma) * RADIUS * 0.72)
     ctx.stroke()
 
+    // Comet dots a fixed angle behind the tip. The offset does not depend
+    // on frame count, so the trail at the end of the sweep matches frame 0.
+    const trailN = 10
+    const trailStep = 1.35
+    const tip = RADIUS * 0.82
+    for (let i = trailN; i >= 1; i--) {
+      const ta = ((sec - i * trailStep) / 60) * TAU - Math.PI / 2
+      const fade = 1 - i / (trailN + 1)
+      ctx.globalAlpha = fade * 0.85
+      ctx.fillStyle = primary
+      ctx.beginPath()
+      ctx.arc(HALF + Math.cos(ta) * tip, HALF + Math.sin(ta) * tip, 1.1 + fade * 1.8, 0, TAU)
+      ctx.fill()
+    }
+    ctx.globalAlpha = 1
+
     // Second hand with glow
     const sa = (sec / 60) * TAU - Math.PI / 2
     ctx.shadowColor = primary
@@ -63,7 +78,7 @@ export async function generateClockFace(opts: PatternOptions): Promise<Uint8Arra
     ctx.lineWidth = 1.5
     ctx.beginPath()
     ctx.moveTo(HALF, HALF)
-    ctx.lineTo(HALF + Math.cos(sa) * RADIUS * 0.82, HALF + Math.sin(sa) * RADIUS * 0.82)
+    ctx.lineTo(HALF + Math.cos(sa) * tip, HALF + Math.sin(sa) * tip)
     ctx.stroke()
     ctx.shadowBlur = 0
 
@@ -251,117 +266,201 @@ export async function generatePerlinFlowField(opts: PatternOptions): Promise<Uin
 // ===================================================================
 // 4. Reaction Diffusion - Gray-Scott model
 // ===================================================================
+//
+// The previous stepper used a 5-point Laplacian (neighbors summed with
+// weight 1, center -4) together with Karl Sims' feed/kill constants and
+// dt = 1. That Laplacian is about 5x too strong for those constants, so
+// the chemicals diverged to NaN inside ~100 steps. Every exported frame
+// was then a flat black disc.
+//
+// This uses Sims' 9-point kernel (weights 0.05 / 0.2 / -1), clamps both
+// chemicals to [0, 1], and plays the growth forward then backward so the
+// loop seam is a single integration stride instead of a hard cut.
+
+const RD_SIM = 184
+const RD_FEED = 0.037
+const RD_KILL = 0.06
+const RD_WARMUP = 100
+const RD_GROWTH = 140
+const RD_MAX_STRIDE = 28
 
 export async function generateReactionDiffusion(opts: PatternOptions): Promise<Uint8Array[]> {
+  if (opts.frames <= 0) return []
+
   const [canvas, ctx] = createCanvas()
-  const W = SIZE
-  const rng = mulberry32(42)
+  const sim = new OffscreenCanvas(RD_SIM, RD_SIM)
+  const simCtx = sim.getContext('2d', { willReadFrequently: true })!
+  const imageData = simCtx.createImageData(RD_SIM, RD_SIM)
 
-  // Gray-Scott parameters (coral growth pattern)
-  const feed = 0.055
-  const kill = 0.062
-  const dA = 1.0
-  const dB = 0.5
-  const dt = 1.0
-
-  // Initialize grids
+  const W = RD_SIM
   let gridA = new Float32Array(W * W).fill(1)
   let gridB = new Float32Array(W * W).fill(0)
   let nextA = new Float32Array(W * W)
   let nextB = new Float32Array(W * W)
 
-  // Seed spots
-  const seedCount = 8
-  for (let s = 0; s < seedCount; s++) {
-    const cx = Math.floor(HALF + (rng() - 0.5) * RADIUS)
-    const cy = Math.floor(HALF + (rng() - 0.5) * RADIUS)
-    const r = 4 + Math.floor(rng() * 6)
-    for (let dy = -r; dy <= r; dy++) {
-      for (let dx = -r; dx <= r; dx++) {
-        if (dx * dx + dy * dy > r * r) continue
-        const x = cx + dx, y = cy + dy
-        if (x < 0 || x >= W || y < 0 || y >= W) continue
-        gridB[y * W + x] = 1
-      }
+  seedReactionDiffusion(gridA, gridB, W)
+
+  const step = (n: number) => {
+    for (let s = 0; s < n; s++) {
+      stepGrayScott(gridA, gridB, nextA, nextB, W, RD_FEED, RD_KILL)
+      const swapA = gridA; gridA = nextA; nextA = swapA
+      const swapB = gridB; gridB = nextB; nextB = swapB
     }
   }
 
-  // Pre-run to develop the pattern into steady state
-  const preSteps = 800
-  for (let s = 0; s < preSteps; s++) {
-    stepRD(gridA, gridB, nextA, nextB, W, feed, kill, dA, dB, dt)
-    const tA = gridA; gridA = nextA; nextA = tA
-    const tB = gridB; gridB = nextB; nextB = tB
-  }
-
-  // Generate raw pixel data, then crossfade ends for seamless loop
-  const stepsPerFrame = 12
-  const imageData = ctx.createImageData(W, W)
-  const primary = [0, 242, 255] // #00f2ff
-  const crossfadeFrames = Math.max(2, Math.floor(opts.frames * 0.2))
-
-  // Store raw grid-B snapshots for the crossfade window
-  const totalRaw = opts.frames + crossfadeFrames
-  const gridSnapshots: Float32Array[] = []
-
-  for (let f = 0; f < totalRaw; f++) {
-    for (let s = 0; s < stepsPerFrame; s++) {
-      stepRD(gridA, gridB, nextA, nextB, W, feed, kill, dA, dB, dt)
-      const tA = gridA; gridA = nextA; nextA = tA
-      const tB = gridB; gridB = nextB; nextB = tB
-    }
-    gridSnapshots.push(new Float32Array(gridB))
-  }
-
-  // Render frames with crossfade at the tail
-  const frames: Uint8Array[] = []
-  for (let f = 0; f < opts.frames; f++) {
-    const data = imageData.data
-    const isBlend = f >= opts.frames - crossfadeFrames
-    const blendAlpha = isBlend
-      ? (f - (opts.frames - crossfadeFrames) + 1) / (crossfadeFrames + 1)
-      : 0
-
-    for (let i = 0; i < W * W; i++) {
-      let bVal = gridSnapshots[f][i]
-      if (isBlend) {
-        // Lerp between current frame and the corresponding wrapped frame
-        const wrapVal = gridSnapshots[f + crossfadeFrames][i]
-        bVal = bVal * (1 - blendAlpha) + wrapVal * blendAlpha
-      }
-      const b = Math.min(1, bVal * 2.5)
-      const idx = i * 4
-      data[idx] = Math.floor(b * primary[0])
-      data[idx + 1] = Math.floor(b * primary[1])
-      data[idx + 2] = Math.floor(b * primary[2])
-      data[idx + 3] = 255
-    }
-
-    ctx.putImageData(imageData, 0, 0)
+  const render = async (): Promise<Uint8Array> => {
+    paintReactionDiffusion(imageData.data, gridB, W)
+    simCtx.putImageData(imageData, 0, 0)
+    ctx.imageSmoothingEnabled = true
+    ctx.imageSmoothingQuality = 'high'
+    ctx.drawImage(sim, 0, 0, SIZE, SIZE)
     circularMask(ctx)
-    frames.push(await toJpeg(canvas, 0.8))
+    return toJpeg(canvas, 0.8)
+  }
+
+  // Still export: one developed frame, past the sparse seed stage.
+  if (opts.frames < 2) {
+    step(RD_WARMUP + RD_GROWTH)
+    return [await render()]
+  }
+
+  step(RD_WARMUP)
+
+  // Ping-pong. State s=0 is the young pattern, s=peak is fully grown.
+  // Frame f maps to s, and the frame before frame 0 is state 1, so the
+  // device loop is one stride of motion with no crossfade smear.
+  const peak = Math.floor(opts.frames / 2)
+  const stride = Math.max(1, Math.min(RD_MAX_STRIDE, Math.round(RD_GROWTH / peak)))
+  const states: Uint8Array[] = []
+  for (let s = 0; s <= peak; s++) {
+    states.push(await render())
+    if (s !== peak) step(stride)
+  }
+
+  const frames: Uint8Array[] = new Array(opts.frames)
+  for (let f = 0; f < opts.frames; f++) {
+    const idx = f <= peak ? f : (2 * peak - f)
+    frames[f] = states[idx]
   }
   return frames
 }
 
-function stepRD(
+function seedReactionDiffusion(gridA: Float32Array, gridB: Float32Array, W: number) {
+  const rng = mulberry32(42)
+  const half = W / 2
+  const rad = half - 2
+  const seedCount = 24
+  for (let s = 0; s < seedCount; s++) {
+    const ang = rng() * TAU
+    const dist = Math.sqrt(rng()) * rad * 0.88
+    const cx = Math.floor(half + Math.cos(ang) * dist)
+    const cy = Math.floor(half + Math.sin(ang) * dist)
+    const r = 2 + Math.floor(rng() * 4)
+    for (let dy = -r; dy <= r; dy++) {
+      for (let dx = -r; dx <= r; dx++) {
+        if (dx * dx + dy * dy > r * r) continue
+        const x = cx + dx
+        const y = cy + dy
+        if (x < 0 || y < 0 || x >= W || y >= W) continue
+        const i = y * W + x
+        gridB[i] = 1
+        gridA[i] = 0.4
+      }
+    }
+  }
+}
+
+function paintReactionDiffusion(data: Uint8ClampedArray, gridB: Float32Array, W: number) {
+  const half = W / 2
+  const rad = half - 1
+  const rad2 = rad * rad
+  for (let y = 0; y < W; y++) {
+    for (let x = 0; x < W; x++) {
+      const o = (y * W + x) * 4
+      const dx = x - half
+      const dy = y - half
+      if (dx * dx + dy * dy > rad2) {
+        data[o] = 6
+        data[o + 1] = 4
+        data[o + 2] = 18
+        data[o + 3] = 255
+        continue
+      }
+      const t = Math.max(0, Math.min(1, gridB[y * W + x] * 3.2))
+      let r: number
+      let g: number
+      let b: number
+      if (t < 0.4) {
+        const u = t / 0.4
+        r = 6 + u * 90
+        g = 4 + u * 10
+        b = 18 + u * 110
+      } else if (t < 0.75) {
+        const u = (t - 0.4) / 0.35
+        r = 96 + u * (10 - 96)
+        g = 14 + u * (210 - 14)
+        b = 128 + u * (235 - 128)
+      } else {
+        const u = (t - 0.75) / 0.25
+        r = 10 + u * 230
+        g = 210 + u * 45
+        b = 235 + u * 20
+      }
+      data[o] = r
+      data[o + 1] = g
+      data[o + 2] = b
+      data[o + 3] = 255
+    }
+  }
+}
+
+/**
+ * One Gray-Scott step. Laplacian is Karl Sims' 9-point kernel:
+ *   0.05  0.20  0.05
+ *   0.20 -1.00  0.20
+ *   0.05  0.20  0.05
+ * Edges are reflective so the circular crop does not show a wrap seam.
+ * A and B are clamped; an unclamped step with dt = 1 can leave [0, 1].
+ */
+function stepGrayScott(
   a: Float32Array, b: Float32Array,
   na: Float32Array, nb: Float32Array,
   W: number, feed: number, kill: number,
-  dA: number, dB: number, dt: number,
 ) {
+  const dA = 1
+  const dB = 0.5
+  const dt = 1
   for (let y = 0; y < W; y++) {
-    const ym = y === 0 ? W - 1 : y - 1
-    const yp = y === W - 1 ? 0 : y + 1
+    const ym = y === 0 ? 0 : y - 1
+    const yp = y === W - 1 ? W - 1 : y + 1
+    const yRow = y * W
+    const ymRow = ym * W
+    const ypRow = yp * W
     for (let x = 0; x < W; x++) {
-      const xm = x === 0 ? W - 1 : x - 1
-      const xp = x === W - 1 ? 0 : x + 1
-      const i = y * W + x
-      const laplaceA = a[ym * W + x] + a[yp * W + x] + a[y * W + xm] + a[y * W + xp] - 4 * a[i]
-      const laplaceB = b[ym * W + x] + b[yp * W + x] + b[y * W + xm] + b[y * W + xp] - 4 * b[i]
-      const abb = a[i] * b[i] * b[i]
-      na[i] = a[i] + (dA * laplaceA - abb + feed * (1 - a[i])) * dt
-      nb[i] = b[i] + (dB * laplaceB + abb - (kill + feed) * b[i]) * dt
+      const xm = x === 0 ? 0 : x - 1
+      const xp = x === W - 1 ? W - 1 : x + 1
+      const i = yRow + x
+      const aC = a[i]
+      const bC = b[i]
+      const lapA =
+        a[ymRow + xm] * 0.05 + a[ymRow + x] * 0.2 + a[ymRow + xp] * 0.05 +
+        a[yRow + xm] * 0.2 + a[yRow + xp] * 0.2 +
+        a[ypRow + xm] * 0.05 + a[ypRow + x] * 0.2 + a[ypRow + xp] * 0.05 -
+        aC
+      const lapB =
+        b[ymRow + xm] * 0.05 + b[ymRow + x] * 0.2 + b[ymRow + xp] * 0.05 +
+        b[yRow + xm] * 0.2 + b[yRow + xp] * 0.2 +
+        b[ypRow + xm] * 0.05 + b[ypRow + x] * 0.2 + b[ypRow + xp] * 0.05 -
+        bC
+      const abb = aC * bC * bC
+      let nA = aC + (dA * lapA - abb + feed * (1 - aC)) * dt
+      let nB = bC + (dB * lapB + abb - (kill + feed) * bC) * dt
+      if (nA < 0) nA = 0
+      else if (nA > 1) nA = 1
+      if (nB < 0) nB = 0
+      else if (nB > 1) nB = 1
+      na[i] = nA
+      nb[i] = nB
     }
   }
 }

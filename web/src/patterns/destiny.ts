@@ -740,17 +740,27 @@ export async function generateTheTraveller(opts: PatternOptions): Promise<Uint8A
 }
 
 // ── Campus 9 ────────────────────────────────────────────
+// Born-and-die fade. A line at u=0 (horizon) and u=1 (near edge) is invisible,
+// so the integer wrap back to frame 0 is the same step as any other frame.
+function corridorEnvelope(u: number): number {
+  const edge = 0.08
+  if (u <= 0 || u >= 1) return 0
+  if (u < edge) return Math.sin((u / edge) * Math.PI * 0.5)
+  if (u > 1 - edge) return Math.sin(((1 - u) / edge) * Math.PI * 0.5)
+  return 1
+}
+
 export async function generateCampus9(opts: PatternOptions): Promise<Uint8Array[]> {
   const [canvas, ctx] = createCanvas()
   const frames: Uint8Array[] = []
 
-  // Ping-pong loop · forward render then mirror back to keep the synthwave
-  // scroll perfectly seamless (no visible seam from grid rows / pillars
-  // snapping back to 0).  Same algorithm as generateHypnoticSpirals.
-  const half = Math.floor(opts.frames / 2) + 1
+  // Two row-spacings per loop, forward only. Ping-pong made the floor run
+  // toward the camera and then back away. An integer number of spacings
+  // puts the same lines on screen at frame 0 and at the hypothetical frame N.
+  const scrolls = 2
 
-  async function renderFrame(f: number): Promise<Uint8Array> {
-    const phase = (half === 1) ? 0 : f / (half - 1)
+  for (let f = 0; f < opts.frames; f++) {
+    const phase = opts.frames <= 1 ? 0.42 : (f / opts.frames) * scrolls
 
     const bg = ctx.createLinearGradient(0, 0, 0, SIZE)
     bg.addColorStop(0.00, '#1a0033')
@@ -780,15 +790,17 @@ export async function generateCampus9(opts: PatternOptions): Promise<Uint8Array[
     const horizonY = SIZE * 0.5
     const vpX = HALF
 
-    // Floor grid scrolling forward · integer cycle (1 row per loop).
+    // Floor grid scrolling forward. Two integer row-spacings per loop.
     const rows = 14
     ctx.strokeStyle = 'rgba(120, 240, 255, 0.85)'
     ctx.lineWidth = 1.5
     for (let i = 0; i < rows; i++) {
-      const u = (i + phase) / rows
+      const u = ((i + phase) % rows) / rows
       const depth = u * u
       const y = horizonY + depth * (SIZE - horizonY)
-      ctx.globalAlpha = 0.15 + 0.7 * (1 - u)
+      const fade = corridorEnvelope(u)
+      if (fade < 0.02) continue
+      ctx.globalAlpha = Math.min(1, fade * (0.15 + 0.7 * (1 - u)))
       ctx.beginPath()
       ctx.moveTo(0, y)
       ctx.lineTo(SIZE, y)
@@ -809,16 +821,17 @@ export async function generateCampus9(opts: PatternOptions): Promise<Uint8Array[
       ctx.stroke()
     }
 
-    // Vertical neon "light columns" flowing toward the viewer.
+    // Vertical neon light columns flowing toward the viewer.
     const pillarCount = 8
     for (let i = 0; i < pillarCount; i++) {
-      const u = (i + phase) / pillarCount
-      if (u <= 0.02) continue
+      const u = ((i + phase) % pillarCount) / pillarCount
+      const fade = corridorEnvelope(u)
+      if (fade < 0.02) continue
       const depth = u * u
       const xOffset = (1 - depth) * (SIZE * 0.55) + 28
       const pillarH = 30 + depth * 140
       const yTop = horizonY - pillarH * 0.2
-      const a = 0.25 + 0.7 * (1 - u)
+      const a = Math.min(1, fade * (0.25 + 0.7 * (1 - u)))
       for (const side of [-1, 1]) {
         const cx = vpX + side * xOffset * (0.2 + 0.8 * depth)
         const glow = ctx.createRadialGradient(cx, yTop + pillarH / 2, 0, cx, yTop + pillarH / 2, pillarH * 0.5)
@@ -839,16 +852,11 @@ export async function generateCampus9(opts: PatternOptions): Promise<Uint8Array[
     ctx.fillStyle = horizonGlow
     ctx.fillRect(0, horizonY - 4, SIZE, 8)
 
+    ctx.globalAlpha = 1
     ctx.fillStyle = '#fff'
     circularMask(ctx)
-    return await toJpeg(canvas, 0.75)
+    frames.push(await toJpeg(canvas, 0.75))
   }
-
-  const forward: Uint8Array[] = []
-  for (let f = 0; f < half; f++) forward.push(await renderFrame(f))
-  for (let f = 0; f < half; f++) frames.push(forward[f])
-  for (let f = half - 2; f >= 1 && frames.length < opts.frames; f--) frames.push(forward[f])
-  while (frames.length < opts.frames) frames.push(forward[forward.length - 1])
   return frames
 }
 
