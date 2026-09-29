@@ -1,8 +1,8 @@
 """Bleak adapter for the E87 / E92 / L8 / X9 badge.
 
 Discovery follows the same service and characteristic candidates as
-web/src/lib/e87-protocol.ts. A scan or an auth probe is as far as this
-machine was exercised: no file was written to a badge from here.
+web/src/lib/e87-protocol.ts. A still image and the Painted Base loop were
+written to a physical E87 from this machine. Unit tests still use a simulated badge.
 """
 
 from __future__ import annotations
@@ -304,7 +304,7 @@ class BleakSession:
             }
         return {
             "verdict": "connect-ok",
-            "detail": f"Authenticated to {hit.name}. No file was sent. Upload has not been tried on a physical badge from this relay.",
+            "detail": f"Authenticated to {hit.name}. No file was sent on this probe. A still image and the Painted Base loop were uploaded to a physical E87 from this relay.",
             "scan_seconds": scan_seconds,
             "scan_found": True,
             "connect_seconds": round(time.monotonic() - connect_started, 2),

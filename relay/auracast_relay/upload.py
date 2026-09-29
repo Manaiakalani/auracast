@@ -1,8 +1,8 @@
 """File upload state machine.
 
 Port of writeFileE87 and ensureE87Auth in web/src/lib/e87-protocol.ts.
-Phase order matches that file. This port was exercised against a simulated
-badge that speaks the same acks. It has not been tried on a physical badge.
+Phase order matches that file. The unit tests use a simulated badge.
+A still JPEG and the Painted Base AVI were accepted by a physical E87.
 """
 
 from __future__ import annotations

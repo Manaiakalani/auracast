@@ -35,8 +35,8 @@ not post to `/api/upload`.
 In local development, `npm run dev` proxies `/api` to `http://127.0.0.1:8787`.
 Start the relay first (`python3 -m auracast_relay` from `relay/`). For an
 iPhone, run it with `--lan`, build this app (`npm run build`, no `BASE_PATH`),
-and open the address the relay prints. The relay was checked against a
-simulated badge, not a physical one.
+and open the address the relay prints. A still image and the Painted Base
+loop were sent to a physical E87.
 
 The client calls:
 
@@ -89,6 +89,6 @@ this `dist/` or reached through the Vite `/api` proxy.
 - Web Bluetooth requires HTTPS or `localhost`.
 - iOS Safari (and therefore every iOS browser) will never support Web
  Bluetooth. Use the Python relay in `../relay` on a computer with a radio.
- That path has not been tried on a physical badge.
+ A still image and the Painted Base loop were sent to a physical E87.
 - Source captures of the official Android companion app are in
  `protocol-understanding/` at the repo root.

@@ -2,7 +2,7 @@
 
 Tables are loaded from that file so this copy cannot drift from the browser.
 The browser module was checked against a captured handshake. This port is
-checked against getEncryptedAuthData() in Node. It has not been run on a badge.
+checked against getEncryptedAuthData() in Node. The handshake also succeeded on a physical E87.
 """
 
 from __future__ import annotations

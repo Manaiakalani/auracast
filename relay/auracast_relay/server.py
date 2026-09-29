@@ -185,7 +185,7 @@ _HELP = """<!doctype html>
 <pre>cd web
 npm run build</pre>
 <p>Then open this same address again. An iPhone must stay on the same Wi-Fi. The phone does not talk to the badge itself. This computer's Bluetooth radio does.</p>
-<p>The upload path was checked against a simulated badge, not a physical one.</p>
+<p>A still image and the Painted Base loop were sent to a physical E87. Unit tests still use a simulated badge.</p>
 """
 
 

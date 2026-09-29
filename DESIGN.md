@@ -5,7 +5,7 @@ description: >-
   smart badge. It writes still images, animations, sequences, marquee text, and QR
   codes to the badge's 368 × 368 OLED over Web Bluetooth in Chromium browsers.
   Safari, Firefox, and iPhone can use the Python relay in relay/, which runs on a
-  computer with Bluetooth. That path has not been tried on a physical badge. The product is
+  computer with Bluetooth. A still image and the Painted Base loop were sent to a physical E87 from that path. The product is
   built around Google Material 3 Expressive with a dark-first theme — a deep navy
   surface stack, a bright cyan primary, and a vivid violet tertiary that together
   echo the badge's neon ring at full brightness. A light theme is available via
