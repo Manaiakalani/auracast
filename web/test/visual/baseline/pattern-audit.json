@@ -5,21 +5,22 @@
       "samples": [
         {
           "frame": 0,
-          "bytes": 26123,
-          "ahash": "0002022008240410"
+          "bytes": 25812,
+          "ahash": "0002020008206010"
         },
         {
           "frame": 4,
-          "bytes": 25948,
-          "ahash": "0808111191100000"
+          "bytes": 26513,
+          "ahash": "080c001410302000"
         },
         {
           "frame": 8,
-          "bytes": 24659,
-          "ahash": "0020002400444600"
+          "bytes": 23202,
+          "ahash": "1010010101222604"
         }
       ],
-      "totalBytes": 311700
+      "totalBytes": 299838,
+      "seamDist": 4
     },
     "gameoflife": {
       "samples": [
@@ -321,16 +322,17 @@
         },
         {
           "frame": 4,
-          "bytes": 31624,
-          "ahash": "2c565318dd461428"
+          "bytes": 33261,
+          "ahash": "1c7685b0af806c28"
         },
         {
           "frame": 8,
-          "bytes": 31624,
-          "ahash": "2c565318dd461428"
+          "bytes": 31607,
+          "ahash": "14086a5a38865a34"
         }
       ],
-      "totalBytes": 373655
+      "totalBytes": 385300,
+      "seamDist": 24
     },
     "voronoi": {
       "samples": [
@@ -588,21 +590,42 @@
       "samples": [
         {
           "frame": 0,
-          "bytes": 4314,
-          "ahash": "ffffffffffffffff"
+          "bytes": 22299,
+          "ahash": "00285856143c1400"
         },
         {
           "frame": 4,
-          "bytes": 4314,
-          "ahash": "ffffffffffffffff"
+          "bytes": 26141,
+          "ahash": "00201b5e763c1000"
         },
         {
           "frame": 8,
-          "bytes": 4314,
-          "ahash": "ffffffffffffffff"
+          "bytes": 26141,
+          "ahash": "00201b5e763c1000"
         }
       ],
-      "totalBytes": 51768,
+      "totalBytes": 300913,
+      "seamDist": 0
+    },
+    "painted-base": {
+      "samples": [
+        {
+          "frame": 0,
+          "bytes": 46766,
+          "ahash": "3c66bfdbddf37e3c"
+        },
+        {
+          "frame": 4,
+          "bytes": 46665,
+          "ahash": "3c66bfdbddf37e3c"
+        },
+        {
+          "frame": 8,
+          "bytes": 46888,
+          "ahash": "3c66bfdbddf37e3c"
+        }
+      ],
+      "totalBytes": 561210,
       "seamDist": 0
     }
   },
@@ -701,21 +724,21 @@
       "samples": [
         {
           "frame": 0,
-          "bytes": 4865,
-          "ahash": "0000000404000000"
+          "bytes": 4314,
+          "ahash": "ffffffffffffffff"
         },
         {
           "frame": 9,
-          "bytes": 8192,
+          "bytes": 8187,
           "ahash": "0000002834000000"
         },
         {
           "frame": 17,
-          "bytes": 9399,
-          "ahash": "0000004874000000"
+          "bytes": 4314,
+          "ahash": "ffffffffffffffff"
         }
       ],
-      "totalBytes": 135048
+      "totalBytes": 129522
     },
     "glow": {
       "samples": [

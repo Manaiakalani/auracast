@@ -12,6 +12,7 @@
     videoToPreviewBitmaps,
     fitJpegFramesToBudget,
     canvasToBadgeJpeg,
+    seekVideoFrame,
     type TransformSettings,
     type OutputFrameSize,
   } from './lib/image-processing'
@@ -205,8 +206,8 @@
     if (fps && Number.isFinite(+fps) && +fps > 0 && +fps <= 120) saved.patternFps = +fps
   }
 
-  // HTTP-fallback transport: when Web Bluetooth isn't available (Safari) we
-  // fall back to talking to the local FastAPI backend (which uses Python BLE).
+  // HTTP fallback: browsers without Web Bluetooth poll the same-origin Python
+  // relay (GET /api/status, POST /api/blob). See relay/README.md.
   // Same UI, different wire - set automatically based on browser capability.
   const hasWebBluetooth = typeof navigator !== 'undefined' && 'bluetooth' in navigator
   let httpConn: { http: true; address: string } | null = $state(null)
@@ -225,7 +226,7 @@
 
   let status = $state(hasWebBluetooth
     ? 'Disconnected'
-    : 'Ready • Safari will connect through the local bridge')
+    : 'Ready. Web Bluetooth is unavailable in this browser.')
   let batteryLevel: number | null = $state(null)
   let batteryUpdatedAt = $state('')
   let batteryCharging = $state(false)
@@ -297,7 +298,7 @@
   // Keyed on mode so switching never produces partial-string artifacts
   // (e.g. "Videoence" from in-place text-node mutation between modes).
   const MODE_HEADER: Record<UploadMode, { icon: string; title: string; panelTitle: string; intro: string }> = {
-    pattern: { icon: 'auto_awesome', title: 'Patterns', panelTitle: 'Pick a pattern', intro: 'Procedural animations rendered to a seamless 368×368 loop. Pick one; it auto-previews, then send it.' },
+    pattern: { icon: 'auto_awesome', title: 'Patterns', panelTitle: 'Pick a pattern', intro: 'Procedural animations rendered to a 368×368 loop. Pick one; it auto-previews, then send it.' },
     text:    { icon: 'text_fields',  title: 'Text',     panelTitle: 'Type your text', intro: 'Type a phrase, choose a vibe. Eight effects from a clean still to a rainbow marquee.' },
     image:   { icon: 'image',        title: 'Image',    panelTitle: 'Upload image',   intro: 'Drop in a still. We crop to circle, fit to 368×368, and burn it to the badge.' },
     images:  { icon: 'reorder',      title: 'Sequence', panelTitle: 'Frame sequence', intro: 'Stack a few stills and play them as a stop-motion loop on the badge.' },
@@ -596,18 +597,18 @@
 
   async function connect(): Promise<void> {
     if (!hasWebBluetooth) {
-      // HTTP fallback: ping the local FastAPI backend.
+      // HTTP fallback: the Python relay answers /api/status.
       isConnecting = true
       try {
-        status = 'Connecting to local HTTP backend…'
+        status = 'Connecting to the Python relay…'
         const r = await fetch('/api/status')
-        if (!r.ok) throw new Error(`backend returned ${r.status}`)
+        if (!r.ok) throw new Error(`relay returned ${r.status}`)
         const d = await r.json()
         httpConn = { http: true, address: d.address ?? 'badge' }
-        status = `Connected via HTTP backend (${d.address ?? 'badge'})`
+        status = `Connected via the Python relay (${d.address ?? 'badge'})`
         log(status)
       } catch (error) {
-        status = `HTTP backend unreachable at /api/status. Make sure the local FastAPI server is running on the same origin. (${(error as Error).message})`
+        status = `Python relay unreachable at /api/status. Start it with python3 -m auracast_relay and open the page it serves. (${(error as Error).message})`
         log(status)
         httpConn = null
       } finally {
@@ -664,7 +665,7 @@
     cancelRequested = true
     if (httpConn) {
       httpConn = null
-      status = 'Disconnected (HTTP backend)'
+      status = 'Disconnected (Python relay)'
       progress = 0
       progressLabel = ''
       log('Disconnected.')
@@ -898,8 +899,7 @@
     try {
       const video = await ensureVideoScrubber()
       const t = Math.max(0, Math.min(videoDuration || video.duration || 0, time))
-      video.currentTime = t
-      await new Promise<void>((resolve) => { video.onseeked = () => resolve() })
+      await seekVideoFrame(video, t)
       if (reqId !== videoScrubRequestId) return
 
       const size = 512
@@ -1347,7 +1347,7 @@
     ctx.fillRect(0, 0, output.width, output.height)
 
     const motif = Math.max(1, Math.floor(Math.min(output.width, output.height) * (332 / 368)))
-    const quietModules = 2
+    const quietModules = 4
     const outerBandModules = 10
     const totalGridModules = moduleCount + (quietModules + outerBandModules) * 2
     const modulePx = Math.max(1, Math.floor(motif / totalGridModules))
@@ -1406,7 +1406,15 @@
         const x = gridOffset + (qrStart + col) * modulePx
         const y = gridOffset + (qrStart + row) * modulePx
         const color = isDark ? qrDarkColor : qrLightColor
-        drawStyledCell(ctx, x + cellInset, y + cellInset, cellSize, qrDotStyle, color)
+        // Finders, separators, timing, alignment, and format bits are reserved.
+        // Round dots there break the shapes a scanner locks onto. Data modules
+        // keep the chosen dot style.
+        if (qr.modules.isReserved(row, col)) {
+          ctx.fillStyle = color
+          ctx.fillRect(x, y, modulePx, modulePx)
+        } else {
+          drawStyledCell(ctx, x + cellInset, y + cellInset, cellSize, qrDotStyle, color)
+        }
       }
     }
 
@@ -1695,7 +1703,7 @@
     uploadStartTime = Date.now()
     totalBytesForEta = payload.length
     if (httpConn) {
-      progressLabel = `Tiny recovery: sending ${formatBytes(payload.length)} via HTTP backend…`
+      progressLabel = `Tiny recovery: sending ${formatBytes(payload.length)} via the Python relay…`
       progress = 5
       const fd = new FormData()
       fd.append('file', new Blob([new Uint8Array(payload)], { type: 'image/jpeg' }), 'recovery.jpg')
@@ -1817,8 +1825,8 @@
       totalBytesForEta = payload.length
 
       if (httpConn) {
-        // HTTP backend path - server handles the BLE side.
-        progressLabel = `Uploading ${formatBytes(payload.length)} via HTTP backend…`
+        // Relay path. The computer's radio talks to the badge.
+        progressLabel = `Uploading ${formatBytes(payload.length)} via the Python relay…`
         progress = 5
         const fd = new FormData()
         const filename = preparedIsStillImage ? 'still.jpg' : 'frames.avi'
@@ -1826,8 +1834,7 @@
         fd.append('file', new Blob([new Uint8Array(payload)], { type: mime }), filename)
         fd.append('kind', preparedIsStillImage ? 'still' : 'animated')
         // Real progress comes from polling /api/status while the request
-        // is in flight - the FastAPI backend parses the e87_badge lib's
-        // own log lines and updates state.detail with percent + bytes.
+        // is in flight. The relay reports percent and byte counts there.
         const httpAbort = new AbortController()
         currentHttpAbort = httpAbort
         let pollHandle: ReturnType<typeof setInterval> | null = null
@@ -1868,7 +1875,7 @@
         progress = 100
         sentBytesForEta = payload.length
         const elapsed = formatDuration((Date.now() - uploadStartTime) / 1000)
-        status = `Upload completed in ${elapsed} (HTTP backend).`
+        status = `Upload completed in ${elapsed} (Python relay).`
         log(status)
         return
       }
@@ -1921,11 +1928,11 @@
 
   async function runDiagnostics(): Promise<void> {
     if (hasWebBluetooth) {
-      log('Diagnostics is HTTP-backend only. Switch to Safari/Firefox or use the device picker on Chrome.')
+      log('Diagnostics is for the Python relay. On Chrome, use the device picker.')
       return
     }
     isRunningDiagnostics = true
-    log('Running backend diagnostics (scan + connect)…')
+    log('Running relay diagnostics (scan + connect)…')
     try {
       const r = await fetch('/api/diagnostics', { cache: 'no-store' })
       const d = await r.json()
@@ -2135,8 +2142,8 @@
             <div class="flex-1 min-w-0">
               <div class="text-title-md font-semibold text-error mb-1">Badge's gallery is full. Clear it via Zrun app</div>
               <ol class="list-decimal pl-5 space-y-1 text-body-sm text-on-surface-variant">
-                <li>The badge has ~970 KB of internal flash. Past uploads each used a unique filename and accumulated until full. <b class="text-on-surface">The web UI now pins all uploads to one slot, but existing garbage must be cleared once.</b></li>
-                <li><b class="text-on-surface">Quickest fix:</b> click <b>🎯 Send tiny recovery image</b> below. We compress the first frame of your selection to ~15&nbsp;KB and send it as a static. That almost always fits even with a near-full gallery, and from then on every send overwrites the same slot.</li>
+                <li>The badge has ~970 KB of internal flash. Each upload uses a new filename, so older images accumulate until the gallery is full. <b class="text-on-surface">Clear the gallery once in Zrun, then keep new clips under the 900 KB fit.</b></li>
+                <li><b class="text-on-surface">Quickest fix:</b> click <b>🎯 Send tiny recovery image</b> below. We compress the first frame of your selection to ~15&nbsp;KB and send it as a static. A file that small usually fits when a full clip does not. Older files stay on the badge until you delete them in Zrun.</li>
                 <li>If that fails too, install <a class="text-primary underline" href="https://apps.apple.com/app/zrun/id1581007145" target="_blank" rel="noopener">Zrun</a>, pair the badge, open the gallery, and <b class="text-on-surface">delete all stored images</b>.</li>
                 <li>Power-cycle the badge if sends hang at 0% rather than rejecting (hold side button until off, wait 3 s, press to power on).</li>
               </ol>
@@ -2155,25 +2162,22 @@
                 <M3Icon name="cable" size={24} class="text-on-tertiary-container" />
               </div>
               <div class="flex flex-col gap-0.5 min-w-0">
-                <h2 class="text-title-lg font-semibold text-on-surface leading-tight m-0">Set up the local bridge</h2>
-                <p class="text-body-md text-on-surface-variant m-0 leading-snug">This browser doesn't speak Web Bluetooth, so the page needs a small Python relay on the same machine to reach the badge.</p>
+                <h2 class="text-title-lg font-semibold text-on-surface leading-tight m-0">Web Bluetooth is unavailable</h2>
+                <p class="text-body-md text-on-surface-variant m-0 leading-snug">This browser cannot talk to the badge directly. A Python relay on a computer with Bluetooth can carry the upload.</p>
               </div>
             </div>
             <ol class="m3-list flex flex-col gap-2.5 text-body-md text-on-surface-variant m-0 p-0 list-none">
               <li class="m3-list-item flex gap-3 items-start">
                 <span aria-hidden="true" class="m3-list-num shrink-0 w-7 h-7 rounded-full bg-secondary-container text-on-secondary-container text-label-md font-semibold flex items-center justify-center leading-none tabular-nums">1</span>
-                <span class="pt-0.5">Open Chrome, Edge, Brave or Arc on desktop or Android · the badge connects directly, no relay needed.</span>
+                <span class="pt-0.5">On a computer with Bluetooth, from the <code class="bg-surface-container px-1.5 py-0.5 rounded text-label-md">relay</code> directory: <code class="bg-surface-container px-1.5 py-0.5 rounded text-label-md">python3 -m auracast_relay --lan</code>. iPhone Safari uses that computer's radio. The phone cannot reach the badge by itself.</span>
               </li>
               <li class="m3-list-item flex gap-3 items-start">
                 <span aria-hidden="true" class="m3-list-num shrink-0 w-7 h-7 rounded-full bg-secondary-container text-on-secondary-container text-label-md font-semibold flex items-center justify-center leading-none tabular-nums">2</span>
-                <span class="pt-0.5">Or run the FastAPI bridge on a Mac/Linux box on the same Wi-Fi:
-                  <code class="bg-surface-container px-1.5 py-0.5 rounded text-label-md">python -m uvicorn server:app --host 0.0.0.0 --port 8089</code>
-                  then open <code class="bg-surface-container px-1.5 py-0.5 rounded text-label-md">http://&lt;that-box&gt;:8089/</code> in this browser.
-                </span>
+                <span class="pt-0.5">Open the page the relay prints. Click Connect, then Send. This page calls <code class="bg-surface-container px-1.5 py-0.5 rounded text-label-md">GET /api/status</code>, <code class="bg-surface-container px-1.5 py-0.5 rounded text-label-md">POST /api/blob</code>, <code class="bg-surface-container px-1.5 py-0.5 rounded text-label-md">POST /api/cancel</code>, and <code class="bg-surface-container px-1.5 py-0.5 rounded text-label-md">GET /api/diagnostics</code>.</span>
               </li>
               <li class="m3-list-item flex gap-3 items-start">
                 <span aria-hidden="true" class="m3-list-num shrink-0 w-7 h-7 rounded-full bg-secondary-container text-on-secondary-container text-label-md font-semibold flex items-center justify-center leading-none tabular-nums">3</span>
-                <span class="pt-0.5">Full setup steps in the <a class="text-primary underline" href="https://github.com/hybridherbst/web-bluetooth-e87/tree/main/web#running-the-http-bridge-safari-firefox-ios-anything-without-web-bluetooth" target="_blank" rel="noopener">README</a>.</span>
+                <span class="pt-0.5">The relay was checked against a simulated badge, not a physical one. Chrome, Edge, Brave, Arc, or Opera on desktop or Android still connect directly. Setup is in the <a class="text-primary underline" href="https://github.com/Manaiakalani/auracast/blob/main/relay/README.md" target="_blank" rel="noopener">relay README</a>.</span>
               </li>
             </ol>
           </div>
@@ -2588,8 +2592,8 @@
               </summary>
               <ol class="help-disclosure-list">
                 <li>The badge auto-sleeps after a few minutes. Press the <b>side button</b> once. The screen lights up and BLE advertising starts.</li>
-                <li>The status pill turns green within ~1 second.</li>
-                <li>If you already clicked Send, the backend will detect the wake-up automatically.</li>
+                <li>The status pill turns green within a few seconds of that advertisement.</li>
+                <li>If Send already failed, press the side button and send again. A send does not wait for the badge to wake.</li>
               </ol>
             </details>
 
@@ -2601,15 +2605,15 @@
               </summary>
               {#if hasWebBluetooth}
                 <ol class="help-disclosure-list">
-                  <li>Click <b>Connect</b>. Chrome lists nearby BLE devices. Pick <code class="bg-surface-container px-1 rounded">E87</code> or one starting with <code class="bg-surface-container px-1 rounded">L8</code>.</li>
+                  <li>Click <b>Connect</b>. The browser lists nearby BLE devices. Pick a name starting with <code class="bg-surface-container px-1 rounded">E87</code>, <code class="bg-surface-container px-1 rounded">E92</code>, <code class="bg-surface-container px-1 rounded">L8</code>, <code class="bg-surface-container px-1 rounded">X9</code>, or <code class="bg-surface-container px-1 rounded">LED Badge</code>.</li>
                   <li>Chrome remembers the choice. Click Disconnect + Connect to re-pair.</li>
                   <li>If empty, the badge is asleep or out of range.</li>
                 </ol>
               {:else}
                 <ol class="help-disclosure-list">
-                  <li>No browser pair dialog. The local FastAPI backend on <code class="bg-surface-container px-1 rounded">:8089</code> talks to the badge directly via macOS Bluetooth.</li>
-                  <li>First time only: macOS may prompt "Terminal would like to use Bluetooth". Click <b>Allow</b>.</li>
-                  <li>If dismissed: <b>System Settings → Privacy &amp; Security → Bluetooth</b>, enable Terminal, relaunch.</li>
+                  <li>This browser has no Bluetooth picker. From the <code class="bg-surface-container px-1 rounded">relay</code> directory on a computer with a radio: <code class="bg-surface-container px-1 rounded">python3 -m auracast_relay</code>. Add <code class="bg-surface-container px-1 rounded">--lan</code> when the phone is on the same Wi-Fi.</li>
+                  <li>macOS may ask for Bluetooth permission the first time that process runs. Allow it. If you dismissed the prompt, enable Bluetooth for that app under System Settings, Privacy &amp; Security, then start the relay again.</li>
+                  <li>Open the page the relay prints, click Connect, then Send. The relay was checked against a simulated badge, not a physical one.</li>
                 </ol>
               {/if}
             </details>
@@ -2621,8 +2625,8 @@
                 <span class="material-symbols-outlined help-disclosure-chevron">chevron_right</span>
               </summary>
               <ul class="help-disclosure-list help-disclosure-list--bulleted">
-                <li><b>Stuck at "X% transferring …" for &gt;30s:</b> the badge dropped the link. Click Cancel, press the side button, then Send. Backend retries 3× automatically.</li>
-                <li><b>"AVI exceeds limit":</b> reduce frame count or fps. Single-slot cap is ~900 KB.</li>
+                <li><b>Stuck while transferring:</b> the badge dropped the link. Click Cancel, press the side button, then Send again.</li>
+                <li><b>"AVI exceeds limit":</b> reduce frame count or fps. Each file is kept under 900 KB. The badge stores about 970 KB, and each send uses a new filename, so older files can still fill it.</li>
                 <li><b>"Badge rejected the upload":</b> gallery is full. Clear via Zrun app (see banner above when this fires).</li>
               </ul>
             </details>
@@ -2655,7 +2659,7 @@
         </M3Dialog>
 
         <!-- ═══ Log card (collapsed) ═══ -->
-        <details class="bg-surface-container rounded-2xl border border-outline-variant overflow-hidden shadow-elev-1 activity-log-card">
+        <details class="bg-surface-container rounded-2xl border border-outline-variant overflow-hidden shadow-elev-1 shrink-0 activity-log-card">
           <summary class="px-5 py-4 cursor-pointer text-label-md uppercase tracking-wider text-on-surface flex items-center justify-between hover:bg-surface-container-high transition-colors">
             <span class="flex items-center gap-2.5">
               <span class="material-symbols-outlined text-[20px] text-primary">terminal</span>

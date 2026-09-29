@@ -231,18 +231,12 @@ export async function generateHypnoticSpirals(opts: PatternOptions): Promise<Uin
   const arms = 14
   const spiralColors = ['#ff0066', '#0066ff', '#ffcc00', '#00ff99', '#cc33ff', '#ff6600']
 
-  // Ping-pong loop: render H = ceil(N/2)+1 forward frames, then play the
-  // interior frames in reverse.  The seam is mathematically perfect ·
-  // the last reverse frame is adjacent to frame 0, and the peak frame is
-  // adjacent to itself (one shared image at the turnaround).  Time can
-  // therefore use any non-integer multipliers without breaking the loop.
-  const half = Math.floor(opts.frames / 2) + 1   // forward frame count
-
-  function renderFrame(f: number) {
-    // Within the forward half, advance phase 0 .. 1 across (half-1) steps so
-    // the turnaround frame is the visual "extreme" of the motion.
-    const phase = (half === 1) ? 0 : f / (half - 1)
-    const t = phase * TAU * 0.1
+  // One full arm rotation per loop. Turbulence, wobble, hue, and the core
+  // pulse use whole numbers of cycles, so frame 0 and the frame after the
+  // last one match. The old clip ran forward and then played backward.
+  for (let f = 0; f < opts.frames; f++) {
+    const phase = opts.frames <= 1 ? 0.35 : f / opts.frames
+    const spin = phase * TAU
     clear(ctx, '#000')
 
     const halo = ctx.createRadialGradient(HALF, HALF, 0, HALF, HALF, RADIUS)
@@ -255,13 +249,14 @@ export async function generateHypnoticSpirals(opts: PatternOptions): Promise<Uin
     ctx.fill()
 
     for (let arm = 0; arm < arms; arm++) {
-      const baseAngle = (arm / arms) * TAU + t * 1.65
+      const baseAngle = (arm / arms) * TAU + spin
       const hueShift = (phase * 360 + arm * 24) % 360
       for (let layer = 0; layer < 3; layer++) {
+        const wobbleCycles = 1 + layer
         ctx.beginPath()
         for (let r = 0; r < RADIUS; r += 1) {
-          const turbulence = Math.sin(r * 0.06 - t * 8 + arm * 0.9) * 0.16
-          const wobble = Math.sin(r * 0.018 + t * (2 + layer * 1.2) + arm * 0.7) * (0.7 + layer * 0.3)
+          const turbulence = Math.sin(r * 0.06 - spin * 2 + arm * 0.9) * 0.16
+          const wobble = Math.sin(r * 0.018 + spin * wobbleCycles + arm * 0.7) * (0.7 + layer * 0.3)
           const twist = r * (0.024 + layer * 0.006) + wobble + turbulence
           const angle = baseAngle + twist
           const x = HALF + Math.cos(angle) * r
@@ -282,7 +277,7 @@ export async function generateHypnoticSpirals(opts: PatternOptions): Promise<Uin
       ctx.globalAlpha = 1
     }
 
-    const pulse = Math.sin(t * 6.5) * 0.34 + 0.72
+    const pulse = Math.sin(spin * 2) * 0.34 + 0.72
     const grad = ctx.createRadialGradient(HALF, HALF, 0, HALF, HALF, 74 * pulse)
     grad.addColorStop(0, 'rgba(255,255,255,0.8)')
     grad.addColorStop(1, 'rgba(255,255,255,0)')
@@ -292,20 +287,8 @@ export async function generateHypnoticSpirals(opts: PatternOptions): Promise<Uin
     ctx.fill()
     ctx.fillStyle = '#fff'
     circularMask(ctx)
+    frames.push(await toJpeg(canvas, 0.4))
   }
-
-  // Render the forward half once, snapshot every frame as JPEG.
-  const forward: Uint8Array[] = []
-  for (let f = 0; f < half; f++) {
-    renderFrame(f)
-    forward.push(await toJpeg(canvas, 0.4))
-  }
-
-  // Output forward, then interior reverse (skip peak and frame 0).
-  for (let f = 0; f < half; f++) frames.push(forward[f])
-  for (let f = half - 2; f >= 1 && frames.length < opts.frames; f--) frames.push(forward[f])
-  // Pad if rounding left us short (only when opts.frames is very small).
-  while (frames.length < opts.frames) frames.push(forward[forward.length - 1])
   return frames
 }
 
@@ -713,6 +696,41 @@ export async function generateKaleidoscope(opts: PatternOptions): Promise<Uint8A
 }
 
 
+// 0 at both ends of a 0..1 trip. Thin streaks use the short sine. Fat
+// sprites use the longer ramp: a short sine still leaves their glow bright
+// a few pixels from the edge, which reads as a pop when they wrap.
+function wrapEnvelope(u: number, edge = 0.12, rounded = false): number {
+  if (u <= 0 || u >= 1) return 0
+  const t = u < edge ? u / edge : u > 1 - edge ? (1 - u) / edge : 1
+  if (t >= 1) return 1
+  const s = Math.sin(t * Math.PI * 0.5)
+  if (!rounded) return s
+  const smooth = t * t * (3 - 2 * t)
+  return smooth * smooth
+}
+
+// A dot whose center crosses x=0 is drawn on both sides, so it slides
+// off one edge instead of teleporting to the other.
+function fillWrapped(
+  ctx: OffscreenCanvasRenderingContext2D,
+  x: number,
+  y: number,
+  r: number,
+) {
+  ctx.beginPath()
+  ctx.arc(x, y, r, 0, TAU)
+  ctx.fill()
+  if (x < r) {
+    ctx.beginPath()
+    ctx.arc(x + SIZE, y, r, 0, TAU)
+    ctx.fill()
+  } else if (x > SIZE - r) {
+    ctx.beginPath()
+    ctx.arc(x - SIZE, y, r, 0, TAU)
+    ctx.fill()
+  }
+}
+
 // ═══════════════════════════════════════════════════════
 // 13. Fire Particles  (rising embers with heat shimmer)
 // ═══════════════════════════════════════════════════════
@@ -752,16 +770,19 @@ export async function generateFireParticles(opts: PatternOptions): Promise<Uint8
     // Draw particles (rising embers)
     for (const p of particles) {
       const localPhase = ((phase * p.speed + p.phaseOff) % 1)
-      // Rise from bottom to top
+      // Rise from bottom to top. Fade in at the bottom and out at the top
+      // so the wrap does not pop a full-bright ember into existence.
+      const fade = wrapEnvelope(localPhase, 0.2, true)
+      if (fade < 0.02) continue
       const y = SIZE * (1 - localPhase)
       // Horizontal wobble
       const wobble = Math.sin(t * p.speed + p.phaseOff * TAU) * p.xDrift
       const x = ((p.x + wobble) % SIZE + SIZE) % SIZE
 
       // Fade: bright at bottom, transparent at top
-      const alpha = Math.max(0, 1 - localPhase) * p.brightness
+      const alpha = Math.max(0, 1 - localPhase) * p.brightness * fade
       // Color: white-yellow core, orange-red outer
-      const coreAlpha = Math.max(0, 1 - localPhase * 1.5)
+      const coreAlpha = Math.max(0, 1 - localPhase * 1.5) * fade
 
       // Outer glow
       const r = 255
@@ -769,16 +790,12 @@ export async function generateFireParticles(opts: PatternOptions): Promise<Uint8
       const b = Math.floor(20 + p.hue - localPhase * 20)
       ctx.globalAlpha = alpha * 0.6
       ctx.fillStyle = `rgb(${r},${Math.max(0, g)},${Math.max(0, b)})`
-      ctx.beginPath()
-      ctx.arc(x, y, p.size * 1.5, 0, TAU)
-      ctx.fill()
+      fillWrapped(ctx, x, y, p.size * 1.5)
 
       // Bright core
       ctx.globalAlpha = coreAlpha * alpha
       ctx.fillStyle = `rgb(255,${Math.min(255, 200 + Math.floor(p.hue))},${Math.min(255, 80 + Math.floor(p.hue * 2))})`
-      ctx.beginPath()
-      ctx.arc(x, y, p.size * 0.6, 0, TAU)
-      ctx.fill()
+      fillWrapped(ctx, x, y, p.size * 0.6)
     }
 
     ctx.globalAlpha = 1
@@ -836,7 +853,10 @@ export async function generateSnowfall(opts: PatternOptions): Promise<Uint8Array
     // Draw snowflakes
     for (const fl of flakes) {
       const localPhase = ((phase * fl.speed + fl.phaseOff) % 1)
-      // Fall from top to bottom
+      // Fall from top to bottom. Invisible at both edges so a flake
+      // fades out at the bottom before it fades in at the top.
+      const fade = wrapEnvelope(localPhase, 0.2, true)
+      if (fade < 0.02) continue
       const y = SIZE * localPhase
       // Gentle side-to-side sway
       const sway = Math.sin(t * fl.swingCycles + fl.phaseOff * TAU) * fl.xSwing
@@ -845,19 +865,15 @@ export async function generateSnowfall(opts: PatternOptions): Promise<Uint8Array
       // Depth-based fade (smaller = farther = dimmer)
       const depthFade = 0.5 + (fl.size / 5.5) * 0.5
 
-      ctx.globalAlpha = fl.alpha * depthFade
+      ctx.globalAlpha = fl.alpha * depthFade * fade
       ctx.fillStyle = '#e8eef8'
-      ctx.beginPath()
-      ctx.arc(x, y, fl.size, 0, TAU)
-      ctx.fill()
+      fillWrapped(ctx, x, y, fl.size)
 
       // Soft glow for larger flakes
       if (fl.size > 3) {
-        ctx.globalAlpha = fl.alpha * 0.2
+        ctx.globalAlpha = fl.alpha * 0.2 * fade
         ctx.fillStyle = '#c0d0ee'
-        ctx.beginPath()
-        ctx.arc(x, y, fl.size * 2.5, 0, TAU)
-        ctx.fill()
+        fillWrapped(ctx, x, y, fl.size * 2.5)
       }
     }
 
@@ -927,11 +943,13 @@ export async function generateCyberpunkRain(opts: PatternOptions): Promise<Uint8
     // Rain streaks
     for (const s of streaks) {
       const localPhase = ((phase * s.speed + s.phaseOff) % 1)
+      const fade = wrapEnvelope(localPhase)
       const y = SIZE * localPhase
       const x = s.x
 
-      // Streak with gradient fade
-      ctx.globalAlpha = s.alpha
+      // Streak fades in at the top and out at the bottom, so the wrap
+      // does not teleport a bright line back to the top of the frame.
+      ctx.globalAlpha = s.alpha * fade
       ctx.strokeStyle = `${s.color}${s.alpha})`
       ctx.lineWidth = s.width
       ctx.lineCap = 'round'
@@ -943,7 +961,7 @@ export async function generateCyberpunkRain(opts: PatternOptions): Promise<Uint8
       // Splash at bottom
       if (localPhase > 0.9) {
         const splashAlpha = (localPhase - 0.9) / 0.1
-        ctx.globalAlpha = s.alpha * (1 - splashAlpha) * 0.5
+        ctx.globalAlpha = s.alpha * (1 - splashAlpha) * 0.5 * fade
         ctx.fillStyle = `${s.color}0.4)`
         ctx.beginPath()
         ctx.arc(x, SIZE * 0.95, 3 + splashAlpha * 4, 0, TAU)

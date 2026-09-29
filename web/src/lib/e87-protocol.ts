@@ -1560,7 +1560,9 @@ export async function writeFileE87(opts: UploadOptions): Promise<void> {
   } = opts
   const { writeChar: characteristic, controlChar: controlCharacteristic } = conn
 
-  const uploadNotificationQueue: Uint8Array[] = [...conn.notificationQueue]
+  // Start empty. Seeding from conn.notificationQueue replayed acks from the
+  // previous upload, so a leftover 0x1d/0x20/0x1c could complete this one early.
+  const uploadNotificationQueue: Uint8Array[] = []
   const mirrorNotificationForUpload = (event: Event) => {
     const target = event.target as BluetoothRemoteGATTCharacteristic
     const value = target.value
@@ -1611,14 +1613,20 @@ export async function writeFileE87(opts: UploadOptions): Promise<void> {
     const raw = new Uint8Array(value.buffer.slice(value.byteOffset, value.byteOffset + value.byteLength))
     const frame = parseE87Frame(raw)
     if (frame && frame.cmd === 0x20 && frame.flag === 0xc0) {
-      fileCompleteHandled = true
       const deviceSeq = frame.body[0] ?? 0
       const respBody = buildFilePathResponse(deviceSeq, uploadMode)
       const respFrame = buildE87Frame(0x00, 0x20, respBody)
+      // Hold the flag while the write is in flight so a second 0x20 does not
+      // send twice. Clear it if the write is rejected so the later fallback
+      // can retry. writeChunkTo falls back to writeValue when the characteristic
+      // has no write-without-response. Not exercised on a badge in this pass.
+      fileCompleteHandled = true
       log(`AUTO-RESPOND cmd 0x20: seq=${deviceSeq}, sending path response (${respFrame.length} bytes)`)
-      characteristic.writeValueWithoutResponse(new Uint8Array(respFrame)).then(() => {
+      const send = writeChunkTo(characteristic, respFrame)
+      void send.then(() => {
         log('cmd 0x20 auto-response sent successfully.')
       }).catch((err: unknown) => {
+        fileCompleteHandled = false
         log(`cmd 0x20 auto-response failed: ${(err as Error).message}`)
       })
     }

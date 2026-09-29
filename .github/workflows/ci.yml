@@ -32,6 +32,10 @@ jobs:
       - name: Type check
         run: npm run check
 
+      - name: Relay simulated-badge tests
+        working-directory: ./relay
+        run: python3 -m unittest discover -s tests -v
+
       - name: Install Playwright Chromium
         run: npx playwright install --with-deps chromium
 

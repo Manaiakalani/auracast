@@ -15,8 +15,9 @@ export async function generateMatrixRain(opts: PatternOptions): Promise<Uint8Arr
   const rng = mulberry32(42)
   const frames: Uint8Array[] = []
 
-  // Per-column: fixed speed & phase offset so they wrap over 1 cycle
-  const colSpeed = Array.from({ length: cols }, () => 0.8 + rng() * 1.2) // rows per phase-unit
+  // Integer trips per loop, plus a phase offset. A fractional speed never
+  // lands on the same row at phase 0 and phase 1, so the badge loop popped.
+  const colCycles = Array.from({ length: cols }, () => 1 + Math.floor(rng() * 3))
   const colPhase = Array.from({ length: cols }, () => rng())
   // Pre-pick characters per (col,row) so they're stable between frames
   const charGrid = Array.from({ length: cols }, () =>
@@ -35,7 +36,7 @@ export async function generateMatrixRain(opts: PatternOptions): Promise<Uint8Arr
 
     for (let c = 0; c < cols; c++) {
       const totalTravel = (rows + 20) // total rows a drop traverses
-      const dropPos = ((phase + colPhase[c]) * totalTravel * colSpeed[c]) % totalTravel
+      const dropPos = ((phase * colCycles[c] + colPhase[c]) % 1) * totalTravel
 
       for (let r = 0; r < rows; r++) {
         const dist = dropPos - r
@@ -124,17 +125,19 @@ export async function generateGameOfLife(opts: PatternOptions): Promise<Uint8Arr
     grid = step(grid)
   }
 
-  // Crossfade first/last ~10% for seamless loop
+  // Blend the tail into the first grid. blendFactor reaches 1 on the
+  // last frame, so that frame is grids[0] and the loop join matches.
+  // The old window stopped at (fadeLen-1)/fadeLen and blended toward
+  // grids[1], so the device cut from a half-mixed frame back to frame 0.
   const fadeLen = Math.max(1, Math.floor(opts.frames * 0.1))
   const frames: Uint8Array[] = []
 
   for (let f = 0; f < opts.frames; f++) {
     if (f >= opts.frames - fadeLen) {
-      // Crossfade window: blend each cell's contribution from the current
-      // frame (g0) and the equivalent looped frame from the start (g1).
-      const blendFactor = (f - (opts.frames - fadeLen)) / fadeLen
+      const i = f - (opts.frames - fadeLen)
+      const blendFactor = (i + 1) / fadeLen
       const g0 = grids[f]
-      const g1 = grids[f - (opts.frames - fadeLen)]
+      const g1 = grids[0]
       clear(ctx, '#0a0a12')
       for (let y = 0; y < gridH; y++) {
         for (let x = 0; x < gridW; x++) {

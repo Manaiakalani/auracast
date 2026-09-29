@@ -43,13 +43,58 @@ export function canvasToBadgeJpeg(
 
 export const E87_IMAGE_WIDTH = 368
 export const E87_IMAGE_HEIGHT = 368
-// Single-slot upload cap. The badge's flash has ~970 KB available per
-// gallery slot. The server pins every upload to a fixed filename so each
-// send overwrites the same slot (otherwise unique random filenames would
-// fill flash cumulatively after a few sends and reject everything).
+// Upload cap. The badge's flash has ~970 KB available. Each send uses a
+// new filename, so this cap only keeps one clip small enough to fit.
 // 900 KB leaves headroom for protocol/AVI overhead.
 export const MAX_UPLOAD_BYTES = 900_000
 export const LIVE_PREVIEW_SIZE = 512
+
+function yieldToUi(): Promise<void> {
+  return new Promise((resolve) => {
+    setTimeout(resolve, 0)
+  })
+}
+
+/**
+ * Seek a video element, resolving immediately when the playhead is already
+ * there. A seek to the current time (often 0 right after loadedmetadata,
+ * or exactly `duration` on the last frame) can be a no-op, and `seeked`
+ * never fires.
+ */
+export function seekVideoFrame(
+  video: HTMLVideoElement,
+  time: number,
+  timeoutMs = 5000,
+): Promise<void> {
+  const duration = Number.isFinite(video.duration) ? video.duration : time
+  const latest = Math.max(0, duration - 1e-3)
+  const t = Math.min(Math.max(0, time), latest)
+  if (video.readyState >= 2 && Math.abs(video.currentTime - t) < 1e-3) {
+    return Promise.resolve()
+  }
+  return new Promise((resolve, reject) => {
+    const timer = setTimeout(() => {
+      cleanup()
+      reject(new Error(`Video seek timed out at t=${t.toFixed(2)}s`))
+    }, timeoutMs)
+    const onSeeked = () => {
+      cleanup()
+      resolve()
+    }
+    const onError = () => {
+      cleanup()
+      reject(new Error('Video seek error'))
+    }
+    const cleanup = () => {
+      clearTimeout(timer)
+      video.removeEventListener('seeked', onSeeked)
+      video.removeEventListener('error', onError)
+    }
+    video.addEventListener('seeked', onSeeked)
+    video.addEventListener('error', onError)
+    video.currentTime = t
+  })
+}
 
 export interface TransformSettings {
   scale: number
@@ -169,6 +214,9 @@ export async function fitJpegFramesToBudget(
         const bytes = canvasToBadgeJpeg(canvas, q)
         out.push(bytes)
         total += bytes.length
+        // jpeg-js is synchronous. Yield so a long clip can still paint and
+        // accept a cancel instead of freezing the tab for the whole search.
+        await yieldToUi()
       }
       best = { frames: out, quality: q, totalBytes: total }
       log?.(`  Re-encoded at quality ${q.toFixed(2)} → ${formatBytes(total)} (budget ${formatBytes(budget)})`)
@@ -226,6 +274,7 @@ export async function previewBitmapsToAvi(
   const frames: Uint8Array[] = []
   for (let i = 0; i < bitmaps.length; i++) {
     frames.push(await squareBitmapToJpeg(bitmaps[i], transform, 0.88, outputSize))
+    await yieldToUi()
     if ((i + 1) % 25 === 0) log?.(`  Encoded ${i + 1}/${bitmaps.length} frames...`)
   }
   const avi = buildMjpgAvi(frames, { fps })
@@ -291,12 +340,7 @@ export async function videoToPreviewBitmaps(
     try {
       for (let i = 0; i < targetFrames; i++) {
         const t = Math.min(end, start + i * step)
-        video.currentTime = t
-        await new Promise<void>((resolve, reject) => {
-          const timeout = setTimeout(() => reject(new Error(`Video seek timed out at t=${t.toFixed(2)}s`)), 5000)
-          video.onseeked = () => { clearTimeout(timeout); resolve() }
-          video.onerror = () => { clearTimeout(timeout); reject(new Error('Video seek error')) }
-        })
+        await seekVideoFrame(video, t)
 
         ctx.fillStyle = 'black'
         ctx.fillRect(0, 0, previewSize, previewSize)

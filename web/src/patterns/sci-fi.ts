@@ -393,18 +393,16 @@ export async function generateArcRadarHd(opts: PatternOptions): Promise<Uint8Arr
     return [u*u*ax + 2*u*lp*cx + lp*lp*bx, u*u*ay + 2*u*lp*cy + lp*lp*by]
   }
 
-  // Live counter as DD:HH:MM:SS plus 2-digit hundredths suffix to match
-  // the source's "T-00:44:01:78" style readout.
+  // Live counter as HH:MM:SS plus hundredths, matching "T-00:44:01:78".
+  // The seconds field used to be dropped, so hundredths sat in its place.
   const fmtCounter = (frac: number, base: number) => {
-    const total = base + frac * 60   // 60 seconds of counter per loop
-    const sec = total
+    const sec = base + frac * 60   // 60 seconds of counter per loop
+    const cs = Math.floor((sec - Math.floor(sec)) * 100) % 100
     const ss = Math.floor(sec) % 60
     const mm = Math.floor(sec / 60) % 60
-    const hh = Math.floor(sec / 3600) % 24
-    const dd = Math.floor(sec / 86400) % 100
-    const cs = Math.floor((sec - Math.floor(sec)) * 100) % 100
+    const hh = Math.floor(sec / 3600) % 100
     const pad = (v: number) => v.toString().padStart(2, '0')
-    return `-${pad(dd)}:${pad(hh)}:${pad(mm)}:${pad(cs)}`
+    return `-${pad(hh)}:${pad(mm)}:${pad(ss)}:${pad(cs)}`
   }
 
   for (let f = 0; f < opts.frames; f++) {

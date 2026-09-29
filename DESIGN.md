@@ -3,8 +3,9 @@ name: AuraCast
 description: >-
   AuraCast is the desktop-first, mobile-aware web companion for the E87 / L8 round
   smart badge. It writes still images, animations, sequences, marquee text, and QR
-  codes to the badge's 368 × 368 OLED over Bluetooth (Web Bluetooth in browsers
-  that support it, or a small FastAPI backend on macOS Safari). The product is
+  codes to the badge's 368 × 368 OLED over Web Bluetooth in Chromium browsers.
+  Safari, Firefox, and iPhone can use the Python relay in relay/, which runs on a
+  computer with Bluetooth. That path has not been tried on a physical badge. The product is
   built around Google Material 3 Expressive with a dark-first theme — a deep navy
   surface stack, a bright cyan primary, and a vivid violet tertiary that together
   echo the badge's neon ring at full brightness. A light theme is available via

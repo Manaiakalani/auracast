@@ -32,6 +32,7 @@
    * Uses a global concurrency limiter so at most 2 thumbnails generate
    * at a time, preventing main-thread stalls on initial load.
    */
+  import { onDestroy } from 'svelte'
   import type { PatternDef } from '../pattern-generators'
   import { generatePatternInWorker, PatternCancelledError } from './pattern-worker-client'
   import type { GenerateHandle } from './pattern-worker-client'
@@ -142,9 +143,16 @@
       observer.disconnect()
       stopAnimation()
       cancelGeneration()
-      // Close generated bitmaps to free GPU/memory resources
-      for (const bmp of frames) bmp.close()
     }
+  })
+
+  // Close bitmaps only when the card goes away. The effect above re-runs
+  // when animation is toggled; closing there left a 'done' card drawing
+  // bitmaps that had already been released.
+  onDestroy(() => {
+    stopAnimation()
+    cancelGeneration()
+    for (const bmp of frames) bmp.close()
   })
 </script>
 
