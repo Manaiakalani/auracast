@@ -2177,7 +2177,7 @@
               </li>
               <li class="m3-list-item flex gap-3 items-start">
                 <span aria-hidden="true" class="m3-list-num shrink-0 w-7 h-7 rounded-full bg-secondary-container text-on-secondary-container text-label-md font-semibold flex items-center justify-center leading-none tabular-nums">3</span>
-                <span class="pt-0.5">The relay was checked against a simulated badge, not a physical one. Chrome, Edge, Brave, Arc, or Opera on desktop or Android still connect directly. Setup is in the <a class="text-primary underline" href="https://github.com/Manaiakalani/auracast/blob/main/relay/README.md" target="_blank" rel="noopener">relay README</a>.</span>
+                <span class="pt-0.5">A still image and the Painted Base loop were sent to a physical E87. Chrome, Edge, Brave, Arc, or Opera on desktop or Android still connect directly. Setup is in the <a class="text-primary underline" href="https://github.com/Manaiakalani/auracast/blob/main/relay/README.md" target="_blank" rel="noopener">relay README</a>.</span>
               </li>
             </ol>
           </div>
@@ -2613,7 +2613,7 @@
                 <ol class="help-disclosure-list">
                   <li>This browser has no Bluetooth picker. From the <code class="bg-surface-container px-1 rounded">relay</code> directory on a computer with a radio: <code class="bg-surface-container px-1 rounded">python3 -m auracast_relay</code>. Add <code class="bg-surface-container px-1 rounded">--lan</code> when the phone is on the same Wi-Fi.</li>
                   <li>macOS may ask for Bluetooth permission the first time that process runs. Allow it. If you dismissed the prompt, enable Bluetooth for that app under System Settings, Privacy &amp; Security, then start the relay again.</li>
-                  <li>Open the page the relay prints, click Connect, then Send. The relay was checked against a simulated badge, not a physical one.</li>
+                  <li>Open the page the relay prints, click Connect, then Send. A still image and the Painted Base loop were sent to a physical E87.</li>
                 </ol>
               {/if}
             </details>

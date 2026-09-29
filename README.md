@@ -38,7 +38,7 @@
 
 That's it. The image appears on your badge in seconds.
 
-> **iPhone / Safari / Firefox?** Those browsers cannot open Bluetooth themselves. The Python relay in [`relay/`](relay/README.md) runs on a computer that has a radio, and the phone uses that computer. The relay was checked against a simulated badge, not a physical one. See [Browser Support](#browser-support).
+> **iPhone / Safari / Firefox?** Those browsers cannot open Bluetooth themselves. The Python relay in [`relay/`](relay/README.md) runs on a computer that has a radio, and the phone uses that computer. A still image and the Painted Base loop were sent to a physical E87. See [Browser Support](#browser-support).
 
 ---
 
@@ -122,7 +122,7 @@ Safari, Firefox, and iOS Chrome cannot open a Bluetooth connection to the badge.
 2. For an iPhone, add `--lan` and open the Wi-Fi address the relay prints. The phone does not talk to the badge. The computer's radio does. `--lan` has no password, so use a network you trust. That address is plain HTTP, so iOS may not install the service worker. Add to Home Screen from a Chromium browser on HTTPS when you want the installed app. The relay page itself still loads.
 3. `cd web && npm run build` once so the relay can serve `web/dist`. On the same Mac, `npm run dev` proxies `/api` to `127.0.0.1:8787`. Restart the dev server if it was already running when that proxy was added.
 
-The page calls `GET /api/status`, `POST /api/blob`, `POST /api/cancel`, `GET /api/diagnostics`, and `POST /api/cache/bust`. The upload state machine was checked against a simulated badge. It has not been tried on a physical badge. Chrome, Edge, Brave, Arc, and Opera on desktop or Android still connect directly and do not need the relay.
+The page calls `GET /api/status`, `POST /api/blob`, `POST /api/cancel`, `GET /api/diagnostics`, and `POST /api/cache/bust`. A still image and the Painted Base loop were sent to a physical E87. The unit tests still use a simulated badge. Chrome, Edge, Brave, Arc, and Opera on desktop or Android still connect directly and do not need the relay.
 
 ---
 
@@ -153,7 +153,7 @@ python3 -m unittest discover -s tests -v   # simulated badge, no radio
 python3 -m auracast_relay                  # or --lan for a phone
 ```
 
-Build `web/dist` first if you want the relay to serve the app. See [relay/README.md](relay/README.md). The unittest command talks to a simulated badge. A physical badge has not been used.
+Build `web/dist` first if you want the relay to serve the app. See [relay/README.md](relay/README.md). The unittest command talks to a simulated badge. A still image and the Painted Base loop were also sent to a physical E87.
 
 ### Project Structure
 

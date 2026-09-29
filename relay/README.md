@@ -2,7 +2,7 @@
 
 Safari, Firefox, and iPhone cannot open a Web Bluetooth connection to an E87, E92, L8, or X9 badge. This process runs on a computer that has a Bluetooth radio and speaks the badge protocol for them. The browser talks to this process over HTTP. The phone does not talk to the badge.
 
-The upload state machine was checked against a simulated badge (`python3 -m unittest discover -s tests -v`). It has not been tried on a physical badge. A passing test is not proof that a real badge accepted a file.
+The upload state machine is checked against a simulated badge (`python3 -m unittest discover -s tests -v`). A still image and the Painted Base loop were also sent to a physical E87, and the badge closed both sessions with status SUCCESS. A passing unit test is not, by itself, proof that a real badge accepted a file.
 
 ## Install
 

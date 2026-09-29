@@ -54,7 +54,7 @@ def main() -> None:
     relay.start()
     port = relay.port
     print("[relay] AuraCast relay is up.", flush=True)
-    print("[relay] Upload was checked against a simulated badge, not a physical one.", flush=True)
+    print("[relay] A still image and the Painted Base loop were sent to a physical E87. Unit tests still use a simulated badge.", flush=True)
     if static_root is None:
         print("[relay] web/dist was not found. API only. Build with: cd web && npm run build", flush=True)
     else:
