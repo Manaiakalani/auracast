@@ -411,6 +411,7 @@ export async function connectE87(log?: (msg: string) => void): Promise<E87Connec
   const device = await navigator.bluetooth.requestDevice({
     filters: [
       { namePrefix: 'E87' },
+      { namePrefix: 'E01' },
       { namePrefix: 'L8' },
       { namePrefix: 'X9' },
       { namePrefix: 'LED Badge' },
