@@ -6,7 +6,7 @@
 
 ### The open-source web app for round LED smart badges
 
-**Upload custom images, GIFs, animations, scrolling text, patterns, and QR codes — straight from your browser. No app store. No USB cable. No account.**
+**Upload custom images, GIFs, animations, scrolling text, patterns, and QR codes: straight from your browser. No app store. No USB cable. No account.**
 
 [![MIT License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![Built with Svelte 5](https://img.shields.io/badge/built%20with-Svelte%205-ff3e00.svg)](https://svelte.dev)
@@ -32,9 +32,9 @@
 ## Quick Start
 
 1. **Press the side button** on your badge to wake it up
-2. **Open AuraCast** in Chrome, Edge, Brave, Arc, or Opera — [launch it here](https://manaiakalani.github.io/auracast/)
+2. **Open AuraCast** in Chrome, Edge, Brave, Arc, or Opera: [launch it here](https://manaiakalani.github.io/auracast/)
 3. **Click Connect** and pick your badge (`E87`, `E92`, `L8`, or `X9`) from the Bluetooth picker
-4. **Drag in an image**, pick a pattern, type some text, or import a GIF — then click **Send**
+4. **Drag in an image**, pick a pattern, type some text, or import a GIF: then click **Send**
 
 That's it. The image appears on your badge in seconds.
 
@@ -50,7 +50,7 @@ That's it. The image appears on your badge in seconds.
 |---|---|---|
 | ✨ | **30 animated patterns** | Matrix Rain, Aurora Ribbons, Fireworks, Clock Face, Flow Field, Reaction Diffusion, Painted Base, Voronoi Crystals, Kaleidoscope, Danmaku, and more. Generated in the browser as looping clips. |
 | 🖼️ | **Image upload** | Drag-and-drop JPEG, PNG, or WebP. Auto-cropped and fitted to the badge's circular 368x368 display. |
-| 🎞️ | **GIF import** | Drop an animated GIF — frames are decoded, circular-cropped, and packed as a looping MJPEG animation on the badge. |
+| 🎞️ | **GIF import** | Drop an animated GIF: frames are decoded, circular-cropped, and packed as a looping MJPEG animation on the badge. |
 | 🔤 | **Text effects** | Static, marquee, rainbow, blink, bounce, typewriter, glow, and wave. Custom colors and fonts. |
 | 🎬 | **Video clips** | Trim MP4/MOV clips to fit the badge's 900 KB storage. Frame-by-frame preview before sending. |
 | 📱 | **QR codes** | High-contrast circular QR codes that scan right off the badge. |
@@ -69,7 +69,7 @@ That's it. The image appears on your badge in seconds.
 <td align="center"><img src="docs/screenshots/desktop-text.png" width="380" alt="Text mode" /></td>
 </tr>
 <tr>
-<td align="center">Pattern mode — 30 animated loops</td>
+<td align="center">Pattern mode: 30 animated loops</td>
 <td align="center">Text mode: marquee, rainbow, typewriter</td>
 </tr>
 <tr>
@@ -194,7 +194,7 @@ auracast/
 
 ## Protocol Documentation
 
-The complete BLE protocol reverse-engineering — every byte of the FE/DC/BA framing, Jieli RCSP authentication handshake, file metadata, windowed data transfer, CRC, and capture format — lives in **[PROTOCOL.md](./PROTOCOL.md)**.
+The complete BLE protocol reverse-engineering, every byte of the FE/DC/BA framing, Jieli RCSP authentication handshake, file metadata, windowed data transfer, CRC, and capture format, lives in **[PROTOCOL.md](./PROTOCOL.md)**.
 
 ---
 
@@ -223,13 +223,13 @@ Built on their shoulders. Painted in Material 3. Shipped over MJPEG.
 
 ## License
 
-[MIT](./LICENSE) — use it however you want.
+[MIT](./LICENSE): use it however you want.
 
 ---
 
 <div align="center">
 
-**[AuraCast](https://manaiakalani.github.io/auracast/)** — the open badge uploader
+**[AuraCast](https://manaiakalani.github.io/auracast/)**: the open badge uploader
 
 <sub>
 Keywords: E87 smart badge · E92 smart badge · L8 LED badge · X9 LED pin · round LED badge · anime badge app · LED smart pin · Zrun alternative · Zrun replacement · HiBadge alternative · Web Bluetooth badge · BLE LED badge · programmable LED pin · round OLED badge · anime LED lapel pin · Akinokai badge · Jieli badge · custom badge uploader · AuraCast
