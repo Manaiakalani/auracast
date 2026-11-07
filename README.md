@@ -40,6 +40,8 @@ That's it. The image appears on your badge in seconds.
 
 > **iPhone / Safari / Firefox?** Those browsers cannot open Bluetooth themselves. The Python relay in [`relay/`](relay/README.md) runs on a computer that has a radio, and the phone uses that computer. A still image and the Painted Base loop were sent to a physical E87. See [Browser Support](#browser-support).
 
+![Onto the round badge: a browser or a Python relay, a circular crop, and the E87, E92, L8, and X9](docs/diagrams/badge-flow.png)
+
 ---
 
 ## Features
