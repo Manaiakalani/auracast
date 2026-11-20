@@ -14,7 +14,7 @@
 [![MIT License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![Built with Svelte 5](https://img.shields.io/badge/built%20with-Svelte%205-ff3e00.svg)](https://svelte.dev)
 [![Web Bluetooth](https://img.shields.io/badge/Web%20Bluetooth-BLE-4285F4.svg)](#browser-support)
-[![GitHub Pages](https://img.shields.io/badge/live-auracast.app-00f2ff.svg)](https://manaiakalani.github.io/auracast/)
+[![Live demo](https://img.shields.io/badge/live_demo-manaiakalani.github.io-00f2ff.svg)](https://manaiakalani.github.io/auracast/)
 
 <p>
   <a href="https://manaiakalani.github.io/auracast/">Live demo</a>
@@ -27,8 +27,8 @@
 </p>
 
 <picture>
-  <source media="(prefers-color-scheme: light)" srcset="docs/screenshots/hero-light.png" />
-  <img src="docs/screenshots/hero-dark.png" alt="AuraCast pattern picker with 30 animated patterns" width="800" />
+  <source media="(prefers-color-scheme: dark)" srcset="docs/screenshots/hero-dark.png" />
+  <img src="docs/screenshots/hero-light.png" alt="AuraCast pattern picker with 30 animated patterns" width="800" />
 </picture>
 
 </div>
