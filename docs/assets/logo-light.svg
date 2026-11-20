@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96" role="img" aria-label="AuraCast">
+  <defs>
+    <radialGradient id="acl-glow" cx="48" cy="48" r="48" gradientUnits="userSpaceOnUse">
+      <stop offset="0.42" stop-color="#00a0a9" stop-opacity="0.18"/>
+      <stop offset="0.78" stop-color="#9800d0" stop-opacity="0.1"/>
+      <stop offset="1" stop-color="#ffffff" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="acl-core" cx="36" cy="32" r="34" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#74f5ff"/>
+      <stop offset="0.32" stop-color="#00a0a9"/>
+      <stop offset="0.7" stop-color="#9800d0"/>
+      <stop offset="1" stop-color="#520071"/>
+    </radialGradient>
+  </defs>
+  <circle cx="48" cy="48" r="46" fill="url(#acl-glow)"/>
+  <circle cx="48" cy="48" r="38" fill="none" stroke="#00696f" stroke-opacity="0.35" stroke-width="1.5"/>
+  <circle cx="48" cy="48" r="30" fill="none" stroke="#00696f" stroke-opacity="0.55" stroke-width="1.75"/>
+  <circle cx="48" cy="48" r="22" fill="url(#acl-core)"/>
+  <circle cx="48" cy="48" r="22" fill="none" stroke="#00363a" stroke-width="2.25"/>
+  <circle cx="40" cy="38" r="7" fill="#ffffff" fill-opacity="0.45"/>
+</svg>
