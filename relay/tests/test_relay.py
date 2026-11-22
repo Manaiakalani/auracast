@@ -31,7 +31,12 @@ from auracast_relay.frames import (  # noqa: E402
     parse_e87_frame,
 )
 from auracast_relay.link import Link  # noqa: E402
-from auracast_relay.server import MAX_BODY_BYTES, Relay  # noqa: E402
+from auracast_relay.server import (  # noqa: E402
+    MAX_BODY_BYTES,
+    Relay,
+    _safe_content_type,
+    _static_file,
+)
 from auracast_relay.upload import UploadError, write_file  # noqa: E402
 
 
@@ -447,6 +452,86 @@ class HttpTests(unittest.TestCase):
                     self.assertNotIn(b"badge-app", caught.exception.read())
                 finally:
                     caught.exception.close()
+            finally:
+                relay.close()
+
+    def test_static_rejects_path_traversal(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            base = Path(tmp)
+            root = base / "static"
+            root.mkdir()
+            (root / "index.html").write_text("<p>badge-app</p>", encoding="utf-8")
+            (root / "app.js").write_text("console.log(1)", encoding="utf-8")
+            secret = base / "secret.txt"
+            secret.write_text("secret-data", encoding="utf-8")
+
+            self.assertIsNone(_static_file(root, "/../secret.txt"))
+            self.assertIsNone(_static_file(root, "/..%2Fsecret.txt"))
+            self.assertIsNone(_static_file(root, "/%2e%2e/secret.txt"))
+            self.assertIsNone(_static_file(root, "/app.js/../../secret.txt"))
+            self.assertIsNone(_static_file(root, "/\x00../secret.txt"))
+            self.assertEqual(_static_file(root, "/app.js").read_text(encoding="utf-8"), "console.log(1)")
+            self.assertEqual(_static_file(root, "/").name, "index.html")
+            self.assertEqual(_static_file(root, "/dashboard").name, "index.html")
+
+            relay = Relay(FakeSession(), host="127.0.0.1", port=0, static_root=root, watch=False)
+            relay.start()
+            try:
+                for raw_path in (
+                    "/../secret.txt",
+                    "/..%2Fsecret.txt",
+                    "/%2e%2e/secret.txt",
+                    "/app.js/../../secret.txt",
+                    "/..%2f..%2fsecret.txt",
+                ):
+                    conn = http.client.HTTPConnection("127.0.0.1", relay.port, timeout=5)
+                    conn.putrequest("GET", raw_path)
+                    conn.endheaders()
+                    resp = conn.getresponse()
+                    body = resp.read()
+                    self.assertEqual(resp.status, 404, msg=raw_path)
+                    self.assertNotIn(b"secret-data", body)
+                    conn.close()
+
+                conn = http.client.HTTPConnection("127.0.0.1", relay.port, timeout=5)
+                conn.putrequest("GET", "/app.js")
+                conn.endheaders()
+                resp = conn.getresponse()
+                self.assertEqual(resp.status, 200)
+                self.assertEqual(resp.read(), b"console.log(1)")
+                self.assertIn("javascript", (resp.getheader("Content-Type") or "").lower())
+                conn.close()
+            finally:
+                relay.close()
+
+    def test_content_type_rejects_crlf_and_controls(self) -> None:
+        self.assertEqual(_safe_content_type("text/javascript; charset=utf-8"), "text/javascript; charset=utf-8")
+        self.assertEqual(_safe_content_type("text/html\r\nSet-Cookie: injected=1"), "application/octet-stream")
+        self.assertEqual(_safe_content_type("text/html\nX-Injected: 1"), "application/octet-stream")
+        self.assertEqual(_safe_content_type("text/plain\rX-Injected: 1"), "application/octet-stream")
+        self.assertEqual(_safe_content_type("text/plain\x00"), "application/octet-stream")
+        self.assertEqual(_safe_content_type("text/plain\x1b"), "application/octet-stream")
+        self.assertEqual(_safe_content_type(""), "application/octet-stream")
+
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            (root / "index.html").write_text("<p>badge-app</p>", encoding="utf-8")
+            evil_name = "note.txt\r\nSet-Cookie: injected=1"
+            (root / evil_name).write_text("visible-body", encoding="utf-8")
+            relay = Relay(FakeSession(), host="127.0.0.1", port=0, static_root=root, watch=False)
+            relay.start()
+            try:
+                conn = http.client.HTTPConnection("127.0.0.1", relay.port, timeout=5)
+                conn.putrequest("GET", "/note.txt%0d%0aSet-Cookie:%20injected=1")
+                conn.endheaders()
+                resp = conn.getresponse()
+                raw_headers = str(resp.msg)
+                body = resp.read()
+                self.assertEqual(resp.status, 200)
+                self.assertEqual(body, b"visible-body")
+                self.assertIsNone(resp.getheader("Set-Cookie"))
+                self.assertNotIn("injected=1", raw_headers)
+                conn.close()
             finally:
                 relay.close()
 

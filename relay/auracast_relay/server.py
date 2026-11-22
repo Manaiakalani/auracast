@@ -15,6 +15,7 @@ from __future__ import annotations
 import asyncio
 import json
 import mimetypes
+import os
 import re
 import threading
 import time
@@ -155,22 +156,75 @@ def parse_multipart(content_type: str, body: bytes) -> dict[str, dict[str, bytes
     return fields
 
 
+def _safe_content_type(value: str) -> str:
+    """Return a Content-Type value that is safe to send as an HTTP header.
+
+    CR and LF are removed. If the original value contained CR, LF, or any
+    other ASCII control character, fall back to application/octet-stream.
+    """
+    fallback = "application/octet-stream"
+    cleaned = value.replace("\r", "").replace("\n", "")
+    if cleaned != value:
+        return fallback
+    for ch in cleaned:
+        if ord(ch) < 32 or ord(ch) == 127:
+            return fallback
+    if not cleaned:
+        return fallback
+    return cleaned
+
+
+def _content_type_for(path: str) -> str:
+    suffix = os.path.splitext(path)[1].lower()
+    mime = _MIME.get(suffix) or mimetypes.guess_type(path)[0] or "application/octet-stream"
+    return _safe_content_type(mime)
+
+
 def _static_file(root: Path, url_path: str) -> Path | None:
+    """Return a file under root for url_path, or None if missing or outside root."""
     rel = unquote(url_path).lstrip("/")
+    if "\x00" in rel:
+        return None
     if not rel or rel.endswith("/"):
         rel = (rel + "index.html") if rel else "index.html"
-    candidate = (root / rel).resolve()
     try:
-        candidate.relative_to(root.resolve())
-    except ValueError:
+        base = os.path.realpath(str(root))
+        target = os.path.realpath(os.path.join(base, rel))
+    except (ValueError, OSError):
         return None
-    if candidate.is_file():
-        return candidate
-    if "." not in Path(rel).name:
-        index = (root / "index.html").resolve()
-        if index.is_file():
-            return index
+    if target != base and not target.startswith(base + os.sep):
+        return None
+    if os.path.isfile(target):
+        return Path(target)
+    if "." not in os.path.basename(rel):
+        try:
+            index = os.path.realpath(os.path.join(base, "index.html"))
+        except (ValueError, OSError):
+            return None
+        if index != base and not index.startswith(base + os.sep):
+            return None
+        if os.path.isfile(index):
+            return Path(index)
     return None
+
+
+def _read_static_file(root: Path, url_path: str) -> tuple[bytes, str] | None:
+    """Read a contained static file. Rejects paths that escape root."""
+    found = _static_file(root, url_path)
+    if found is None:
+        return None
+    try:
+        base = os.path.realpath(str(root))
+        target = os.path.realpath(str(found))
+    except (ValueError, OSError):
+        return None
+    if target != base and not target.startswith(base + os.sep):
+        return None
+    if not os.path.isfile(target):
+        return None
+    with open(target, "rb") as handle:
+        body = handle.read()
+    return body, _content_type_for(target)
 
 
 _HELP = """<!doctype html>
@@ -272,6 +326,7 @@ class Relay:
                 self.wfile.write(body)
 
             def _bytes(self, status: int, body: bytes, content_type: str) -> None:
+                content_type = _safe_content_type(content_type).replace("\r", "").replace("\n", "")
                 self.send_response(status)
                 self.send_header("Content-Type", content_type)
                 self.send_header("Content-Length", str(len(body)))
@@ -287,10 +342,10 @@ class Relay:
                     self._diagnostics()
                     return
                 if relay.static_root is not None:
-                    found = _static_file(relay.static_root, path)
-                    if found is not None:
-                        mime = _MIME.get(found.suffix.lower()) or mimetypes.guess_type(found.name)[0] or "application/octet-stream"
-                        self._bytes(200, found.read_bytes(), mime)
+                    payload = _read_static_file(relay.static_root, path)
+                    if payload is not None:
+                        body, mime = payload
+                        self._bytes(200, body, mime)
                         return
                     self._bytes(404, b"Not found", "text/plain; charset=utf-8")
                     return

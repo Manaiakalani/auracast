@@ -14,12 +14,11 @@
 import { writeFileSync, mkdirSync } from 'node:fs'
 import { dirname, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
-import {
-  argbFromHex,
-  hexFromArgb,
-  TonalPalette,
-  Hct,
-} from '@material/material-color-utilities'
+// Import modules that ship with .js extensions. The package barrel loads
+// scheme files whose extensionless imports fail under Node ESM.
+import { argbFromHex, hexFromArgb } from '../node_modules/@material/material-color-utilities/utils/string_utils.js'
+import { TonalPalette } from '../node_modules/@material/material-color-utilities/palettes/tonal_palette.js'
+import { Hct } from '../node_modules/@material/material-color-utilities/hct/hct.js'
 
 // ── Brand seeds ──────────────────────────────────────────────────────
 const PRIMARY_SEED = '#00f2ff'
