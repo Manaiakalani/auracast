@@ -190,10 +190,9 @@ def _rel_from_url(url_path: str) -> str:
 def _open_under_root(root: Path, rel: str) -> tuple[str, bytes] | None:
     """Open rel only after it is proven to stay under root.
 
-    CodeQL's py/path-injection sanitizer is a startswith check on a
-    normpath join. That check runs before realpath, isfile, or open.
-    The same check runs again on the realpath result so symlink escapes
-    are rejected too.
+    Join with os.path.normpath, reject paths that are not base or
+    base+sep, then realpath and apply the same check again. isfile and
+    open run only on the true branch of startswith(base).
     """
     if "\x00" in rel:
         return None
@@ -210,10 +209,12 @@ def _open_under_root(root: Path, rel: str) -> tuple[str, bytes] | None:
         return None
     if not fullpath.startswith(base + os.sep) and fullpath != base:
         return None
-    if not os.path.isfile(fullpath):
-        return None
-    with open(fullpath, "rb") as handle:
-        return fullpath, handle.read()
+    if fullpath.startswith(base):
+        if os.path.isfile(fullpath):
+            if fullpath.startswith(base):
+                with open(fullpath, "rb") as handle:
+                    return fullpath, handle.read()
+    return None
 
 
 def _static_file(root: Path, url_path: str) -> Path | None:
