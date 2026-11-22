@@ -59,7 +59,7 @@
   {type}
   {disabled}
   aria-label={ariaLabel}
-  class="m3-fab group/fab relative inline-flex items-center justify-center isolate font-medium select-none touch-manipulation shadow-elev-3 transition-[box-shadow,transform] duration-200 ease-m3-standard hover:shadow-elev-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface active:scale-[0.96] disabled:opacity-40 disabled:cursor-not-allowed disabled:shadow-none disabled:active:scale-100 {sizeClass} {variantClass} {klass}"
+  class="m3-fab group/fab relative inline-flex items-center justify-center isolate font-medium select-none touch-manipulation shadow-elev-3 transition-[box-shadow,transform] duration-200 ease-m3-standard hover:shadow-elev-4 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface active:scale-[0.96] disabled:opacity-40 disabled:cursor-not-allowed disabled:shadow-none disabled:active:scale-100 {sizeClass} {variantClass} {klass}"
   {onclick}
 >
   <span class="state-layer pointer-events-none absolute inset-0 -z-10 {size === 'sm' ? 'rounded-xl' : size === 'lg' ? 'rounded-3xl' : 'rounded-2xl'} bg-current opacity-0 transition-opacity duration-150 ease-m3-standard group-hover/fab:opacity-[0.08] group-focus-visible/fab:opacity-[0.12] group-active/fab:opacity-[0.16]"></span>

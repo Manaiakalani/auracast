@@ -1971,12 +1971,12 @@
 
 <div class="relative z-10 flex flex-col h-screen overflow-hidden">
   <!-- ═══ M3 Top App Bar ═══ -->
-  <M3TopAppBar elevated class="!fixed !top-0 !left-0 !right-0">
+  <M3TopAppBar elevated class="fixed! top-0! left-0! right-0!">
     {#snippet leading()}
       <div class="flex items-center gap-2.5">
         <AuraCastLogo3D size={40} />
         <div class="hidden sm:flex items-baseline gap-px text-headline-sm tracking-tight leading-none">
-          <span class="font-semibold text-on-surface">Aura</span><span class="font-semibold bg-gradient-to-r from-tertiary to-primary bg-clip-text text-transparent">Cast</span>
+          <span class="font-semibold text-on-surface">Aura</span><span class="font-semibold bg-linear-to-r from-tertiary to-primary bg-clip-text text-transparent">Cast</span>
         </div>
       </div>
     {/snippet}
@@ -2005,7 +2005,7 @@
           <M3Icon name="brightness_medium" size={18} class="text-primary" />
           <input type="range" min="0" max="100" value={brightnessLevel}
             oninput={debouncedSetBrightness}
-            class="w-20 h-1 accent-[var(--md-sys-color-primary)] cursor-pointer" />
+            class="w-20 h-1 accent-(--md-sys-color-primary) cursor-pointer" />
           <span class="text-label-sm tabular-nums w-7 text-right">{brightnessLevel}%</span>
         </div>
       {/if}
@@ -2013,7 +2013,7 @@
         <div class="relative">
           <button
             type="button"
-            class="h-9 px-2.5 sm:px-3 inline-flex items-center gap-1.5 rounded-full bg-surface-container-high text-on-surface hover:bg-surface-container-highest transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+            class="h-9 px-2.5 sm:px-3 inline-flex items-center gap-1.5 rounded-full bg-surface-container-high text-on-surface hover:bg-surface-container-highest transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-primary"
             aria-label="Device language"
             aria-haspopup="menu"
             aria-expanded={languageMenuOpen}
@@ -2039,7 +2039,7 @@
 
               <button
                 type="button"
-                class="w-full h-10 px-3 rounded-xl flex items-center gap-2 text-left text-label-lg hover:bg-on-surface/[0.08] transition-colors {deviceLanguage === 'zh-CN' ? 'bg-secondary-container text-on-secondary-container' : 'text-on-surface'}"
+                class="w-full h-10 px-3 rounded-xl flex items-center gap-2 text-left text-label-lg hover:bg-on-surface/8 transition-colors {deviceLanguage === 'zh-CN' ? 'bg-secondary-container text-on-secondary-container' : 'text-on-surface'}"
                 role="menuitemradio"
                 aria-checked={deviceLanguage === 'zh-CN'}
                 onclick={() => deviceLanguage = 'zh-CN'}
@@ -2050,7 +2050,7 @@
 
               <button
                 type="button"
-                class="w-full h-10 px-3 rounded-xl flex items-center gap-2 text-left text-label-lg hover:bg-on-surface/[0.08] transition-colors {deviceLanguage === 'en' ? 'bg-secondary-container text-on-secondary-container' : 'text-on-surface'}"
+                class="w-full h-10 px-3 rounded-xl flex items-center gap-2 text-left text-label-lg hover:bg-on-surface/8 transition-colors {deviceLanguage === 'en' ? 'bg-secondary-container text-on-secondary-container' : 'text-on-surface'}"
                 role="menuitemradio"
                 aria-checked={deviceLanguage === 'en'}
                 onclick={() => deviceLanguage = 'en'}
@@ -2109,7 +2109,7 @@
         destinations={MODE_TABS.map(t => ({ value: t.id, label: t.label, icon: t.icon }))}
         value={uploadMode}
         onchange={(v) => switchMode(v)}
-        class="!h-full"
+        class="h-full!"
       >
         {#snippet footer()}
           {#if !hasWebBluetooth}
@@ -2137,7 +2137,7 @@
 
         <!-- Connection / wake banners -->
         {#if !hasWebBluetooth && backendState === 'error' && backendDetail.includes('rejected')}
-          <M3Card variant="outlined" class="p-5 flex gap-4 border-error/40 bg-error-container/20">
+          <M3Card variant="outlined" class="p-5 flex gap-4 border-error/40">
             <span class="material-symbols-outlined text-error text-[28px] shrink-0">warning</span>
             <div class="flex-1 min-w-0">
               <div class="text-title-md font-semibold text-error mb-1">Badge's gallery is full. Clear it via Zrun app</div>
@@ -2156,7 +2156,7 @@
           </M3Card>
         {/if}
         {#if !hasWebBluetooth && bridgeReachable === false}
-          <div class="rounded-2xl border border-tertiary/40 bg-tertiary-container/40 p-5 sm:p-6 flex flex-col gap-3">
+          <div class="rounded-2xl border border-tertiary/40 p-5 sm:p-6 flex flex-col gap-3">
             <div class="flex items-center gap-3">
               <div class="shrink-0 w-10 h-10 rounded-full bg-tertiary-container flex items-center justify-center">
                 <M3Icon name="cable" size={24} class="text-on-tertiary-container" />
@@ -2212,7 +2212,7 @@
 
         <!-- Mode panel + preview (Connection card deleted; connection lives in app bar) -->
         <div class="grid grid-cols-1 gap-6 items-start">
-          <M3Card variant="filled" class="!rounded-2xl p-4 sm:p-5 flex flex-col gap-4 min-w-0">
+          <M3Card variant="filled" class="rounded-2xl! p-4 sm:p-5 flex flex-col gap-4 min-w-0">
             <div class="flex items-center justify-between flex-wrap gap-2">
               <h2 class="text-title-lg text-on-surface font-semibold">{MODE_HEADER[uploadMode].panelTitle}</h2>
               {#if uploadMode === 'image'}
@@ -2563,7 +2563,7 @@
                 <div class="flex gap-3 items-end border-t border-outline-variant pt-3">
                   <label class="flex flex-col gap-1 text-[12px]">
                     <span class="text-label-md text-on-surface-variant">Inter-chunk delay (ms)</span>
-                    <input type="number" inputmode="numeric" autocomplete="off" min="0" max="1000" step="1" bind:value={interChunkDelayMs} disabled={isWriting} aria-label="Inter-chunk delay in milliseconds" class="tabular max-w-[8rem]" />
+                    <input type="number" inputmode="numeric" autocomplete="off" min="0" max="1000" step="1" bind:value={interChunkDelayMs} disabled={isWriting} aria-label="Inter-chunk delay in milliseconds" class="tabular max-w-32" />
                   </label>
                 </div>
               {/if}
@@ -2730,12 +2730,12 @@
 <style>
   :global(body) {
     margin: 0;
-    background: #0b0d12;
-    color: #e6eaf2;
+    background: var(--md-sys-color-background, #0b0d12);
+    color: var(--md-sys-color-on-background, #e6eaf2);
     font-family: 'Manrope Variable', 'Manrope', ui-sans-serif, system-ui, sans-serif;
     min-height: 100vh;
   }
-  :global(html) { background: #0b0d12; }
+  :global(html) { background: var(--md-sys-color-background, #0b0d12); }
 
   /* ── Footer wordmark + credit chips ──────────────────────────────
      Aurora-gradient AuraCast wordmark and pill-shaped credit chips

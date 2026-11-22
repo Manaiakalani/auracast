@@ -66,7 +66,7 @@
         step={framesStep}
         bind:value={frames}
         {disabled}
-        class="tabular max-w-[8rem]"
+        class="tabular max-w-32"
       />
     </label>
     <label class="flex flex-col gap-2">
@@ -80,7 +80,7 @@
         step={fpsStep}
         bind:value={fps}
         {disabled}
-        class="tabular max-w-[6rem]"
+        class="tabular max-w-24"
       />
     </label>
   </div>

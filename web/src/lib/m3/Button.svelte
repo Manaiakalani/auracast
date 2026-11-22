@@ -70,7 +70,7 @@
 <button
   {type}
   {disabled}
-  class="m3-button group/btn relative inline-flex items-center justify-center isolate rounded-full font-medium select-none whitespace-nowrap touch-manipulation transition-[box-shadow,transform] duration-150 ease-m3-standard focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface active:scale-[0.97] disabled:opacity-40 disabled:cursor-not-allowed disabled:shadow-none disabled:active:scale-100 {sizeClass} {variantClass} {fullWidth ? 'w-full' : ''} {klass}"
+  class="m3-button group/btn relative inline-flex items-center justify-center isolate rounded-full font-medium select-none whitespace-nowrap touch-manipulation transition-[box-shadow,transform] duration-150 ease-m3-standard focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface active:scale-[0.97] disabled:opacity-40 disabled:cursor-not-allowed disabled:shadow-none disabled:active:scale-100 {sizeClass} {variantClass} {fullWidth ? 'w-full' : ''} {klass}"
   aria-label={ariaLabel}
   {onclick}
 >

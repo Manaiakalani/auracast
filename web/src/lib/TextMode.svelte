@@ -101,8 +101,8 @@
     {#each TEXT_EFFECTS as eff}
       <button
         type="button"
-        class="group relative flex flex-col items-start gap-1 rounded-2xl px-4 py-3 text-left border transition-[colors,box-shadow,transform] duration-150 ease-m3-standard isolate active:scale-[0.98] focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface {textEffect === eff.id
-          ? 'border-primary bg-primary-container/30 shadow-elev-1'
+        class="group relative flex flex-col items-start gap-1 rounded-2xl px-4 py-3 text-left border transition-[colors,box-shadow,transform] duration-150 ease-m3-standard isolate active:scale-[0.98] focus:outline-hidden focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface {textEffect === eff.id
+          ? 'border-primary shadow-elev-1'
           : 'border-outline-variant bg-surface-container-low hover:border-primary/60 hover:bg-surface-container'}"
         onclick={() => (textEffect = eff.id)}
         disabled={isWriting}
@@ -136,7 +136,7 @@
     {#each PRESETS as p}
       <button
         type="button"
-        class="rounded-full px-4 py-2 text-label-md font-medium border border-outline-variant transition-[transform,border-color] duration-150 ease-m3-standard hover:-translate-y-0.5 hover:border-primary active:scale-[0.97] active:translate-y-0 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0 disabled:active:scale-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface"
+        class="rounded-full px-4 py-2 text-label-md font-medium border border-outline-variant transition-[transform,border-color] duration-150 ease-m3-standard hover:-translate-y-0.5 hover:border-primary active:scale-[0.97] active:translate-y-0 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0 disabled:active:scale-100 focus:outline-hidden focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface"
         onclick={() => { textColor = p.fg; textBackground = p.bg }}
         disabled={isWriting}
         style="background:{p.bg}; color:{p.fg};"

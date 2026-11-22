@@ -1,10 +1,11 @@
 import { defineConfig } from 'vite'
 import { svelte } from '@sveltejs/vite-plugin-svelte'
+import tailwindcss from '@tailwindcss/vite'
 import basicSsl from '@vitejs/plugin-basic-ssl'
 
 // https://vite.dev/config/
 export default defineConfig({
-  plugins: [svelte(), basicSsl()],
+  plugins: [tailwindcss(), svelte(), basicSsl()],
   base: process.env.BASE_PATH,
   // jpeg-js (used to produce badge-compatible JPEGs with standard Huffman
   // tables) imports Node's `Buffer`. Polyfill it in the browser bundle.

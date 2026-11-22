@@ -44,7 +44,7 @@
   type={Tag === 'button' ? 'button' : undefined}
   role={Tag === 'div' && onclick ? 'button' : undefined}
   tabindex={Tag === 'div' && onclick ? 0 : undefined}
-  class="m3-card group/card relative isolate rounded-2xl overflow-hidden transition-shadow duration-200 ease-m3-standard {variantClass} {(interactive || onclick) ? 'cursor-pointer text-left w-full hover:shadow-elev-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary' : ''} {klass}"
+  class="m3-card group/card relative isolate rounded-2xl overflow-hidden transition-shadow duration-200 ease-m3-standard {variantClass} {(interactive || onclick) ? 'cursor-pointer text-left w-full hover:shadow-elev-2 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-primary' : ''} {klass}"
   {onclick}
 >
   {#if interactive || onclick}

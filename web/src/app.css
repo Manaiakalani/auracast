@@ -1,6 +1,174 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import 'tailwindcss';
+
+@custom-variant dark (&:is(.dark *));
+
+@theme {
+  --color-primary: var(--md-sys-color-primary);
+  --color-on-primary: var(--md-sys-color-on-primary);
+  --color-primary-container: var(--md-sys-color-primary-container);
+  --color-on-primary-container: var(--md-sys-color-on-primary-container);
+  --color-inverse-primary: var(--md-sys-color-inverse-primary);
+  --color-secondary: var(--md-sys-color-secondary);
+  --color-on-secondary: var(--md-sys-color-on-secondary);
+  --color-secondary-container: var(--md-sys-color-secondary-container);
+  --color-on-secondary-container: var(--md-sys-color-on-secondary-container);
+  --color-tertiary: var(--md-sys-color-tertiary);
+  --color-on-tertiary: var(--md-sys-color-on-tertiary);
+  --color-tertiary-container: var(--md-sys-color-tertiary-container);
+  --color-on-tertiary-container: var(--md-sys-color-on-tertiary-container);
+  --color-error: var(--md-sys-color-error);
+  --color-on-error: var(--md-sys-color-on-error);
+  --color-error-container: var(--md-sys-color-error-container);
+  --color-on-error-container: var(--md-sys-color-on-error-container);
+  --color-background: var(--md-sys-color-background);
+  --color-on-background: var(--md-sys-color-on-background);
+  --color-surface: var(--md-sys-color-surface);
+  --color-on-surface: var(--md-sys-color-on-surface);
+  --color-surface-variant: var(--md-sys-color-surface-variant);
+  --color-on-surface-variant: var(--md-sys-color-on-surface-variant);
+  --color-inverse-surface: var(--md-sys-color-inverse-surface);
+  --color-inverse-on-surface: var(--md-sys-color-inverse-on-surface);
+  --color-surface-container-lowest: var(
+    --md-sys-color-surface-container-lowest
+  );
+  --color-surface-container-low: var(--md-sys-color-surface-container-low);
+  --color-surface-container: var(--md-sys-color-surface-container);
+  --color-surface-container-high: var(--md-sys-color-surface-container-high);
+  --color-surface-container-highest: var(
+    --md-sys-color-surface-container-highest
+  );
+  --color-surface-bright: var(--md-sys-color-surface-bright);
+  --color-surface-dim: var(--md-sys-color-surface-dim);
+  --color-surface-tint: var(--md-sys-color-surface-tint);
+  --color-outline: var(--md-sys-color-outline);
+  --color-outline-variant: var(--md-sys-color-outline-variant);
+  --color-scrim: var(--md-sys-color-scrim);
+  --color-shadow: var(--md-sys-color-shadow);
+  --color-aura-cyan: #00f2ff;
+  --color-aura-purple: #bc00ff;
+  --color-aura-dark: #0a0b1e;
+
+  --radius-none: var(--md-sys-shape-corner-none);
+  --radius-xs: var(--md-sys-shape-corner-xs);
+  --radius-sm: var(--md-sys-shape-corner-sm);
+  --radius: var(--md-sys-shape-corner-sm);
+  --radius-md: var(--md-sys-shape-corner-md);
+  --radius-lg: var(--md-sys-shape-corner-lg);
+  --radius-xl: var(--md-sys-shape-corner-lg);
+  --radius-2xl: var(--md-sys-shape-corner-xl);
+  --radius-3xl: var(--md-sys-shape-corner-xl);
+  --radius-full: var(--md-sys-shape-corner-full);
+
+  --shadow-elev-0: var(--md-sys-elevation-level0);
+  --shadow-elev-1: var(--md-sys-elevation-level1);
+  --shadow-elev-2: var(--md-sys-elevation-level2);
+  --shadow-elev-3: var(--md-sys-elevation-level3);
+  --shadow-elev-4: var(--md-sys-elevation-level4);
+  --shadow-elev-5: var(--md-sys-elevation-level5);
+  --shadow-glow-primary: var(--aura-glow-primary);
+
+  --font-brand:
+    'Space Grotesk Variable', 'Space Grotesk', ui-sans-serif, system-ui;
+  --font-sans: 'Manrope Variable', Manrope, ui-sans-serif, system-ui;
+  --font-mono:
+    'JetBrains Mono Variable', 'JetBrains Mono', ui-monospace, SFMono-Regular,
+    Consolas, monospace;
+
+  --text-display-lg: var(--md-sys-typescale-display-lg-size);
+  --text-display-lg--line-height: var(--md-sys-typescale-display-lg-line);
+  --text-display-lg--letter-spacing: var(--md-sys-typescale-display-lg-track);
+  --text-display-lg--font-weight: var(--md-sys-typescale-display-lg-weight);
+  --text-display-md: var(--md-sys-typescale-display-md-size);
+  --text-display-md--line-height: var(--md-sys-typescale-display-md-line);
+  --text-display-md--letter-spacing: var(--md-sys-typescale-display-md-track);
+  --text-display-md--font-weight: var(--md-sys-typescale-display-md-weight);
+  --text-display-sm: var(--md-sys-typescale-display-sm-size);
+  --text-display-sm--line-height: var(--md-sys-typescale-display-sm-line);
+  --text-display-sm--letter-spacing: var(--md-sys-typescale-display-sm-track);
+  --text-display-sm--font-weight: var(--md-sys-typescale-display-sm-weight);
+  --text-headline-lg: var(--md-sys-typescale-headline-lg-size);
+  --text-headline-lg--line-height: var(--md-sys-typescale-headline-lg-line);
+  --text-headline-lg--letter-spacing: var(--md-sys-typescale-headline-lg-track);
+  --text-headline-lg--font-weight: var(--md-sys-typescale-headline-lg-weight);
+  --text-headline-md: var(--md-sys-typescale-headline-md-size);
+  --text-headline-md--line-height: var(--md-sys-typescale-headline-md-line);
+  --text-headline-md--letter-spacing: var(--md-sys-typescale-headline-md-track);
+  --text-headline-md--font-weight: var(--md-sys-typescale-headline-md-weight);
+  --text-headline-sm: var(--md-sys-typescale-headline-sm-size);
+  --text-headline-sm--line-height: var(--md-sys-typescale-headline-sm-line);
+  --text-headline-sm--letter-spacing: var(--md-sys-typescale-headline-sm-track);
+  --text-headline-sm--font-weight: var(--md-sys-typescale-headline-sm-weight);
+  --text-title-lg: var(--md-sys-typescale-title-lg-size);
+  --text-title-lg--line-height: var(--md-sys-typescale-title-lg-line);
+  --text-title-lg--letter-spacing: var(--md-sys-typescale-title-lg-track);
+  --text-title-lg--font-weight: var(--md-sys-typescale-title-lg-weight);
+  --text-title-md: var(--md-sys-typescale-title-md-size);
+  --text-title-md--line-height: var(--md-sys-typescale-title-md-line);
+  --text-title-md--letter-spacing: var(--md-sys-typescale-title-md-track);
+  --text-title-md--font-weight: var(--md-sys-typescale-title-md-weight);
+  --text-title-sm: var(--md-sys-typescale-title-sm-size);
+  --text-title-sm--line-height: var(--md-sys-typescale-title-sm-line);
+  --text-title-sm--letter-spacing: var(--md-sys-typescale-title-sm-track);
+  --text-title-sm--font-weight: var(--md-sys-typescale-title-sm-weight);
+  --text-body-lg: var(--md-sys-typescale-body-lg-size);
+  --text-body-lg--line-height: var(--md-sys-typescale-body-lg-line);
+  --text-body-lg--letter-spacing: var(--md-sys-typescale-body-lg-track);
+  --text-body-lg--font-weight: var(--md-sys-typescale-body-lg-weight);
+  --text-body-md: var(--md-sys-typescale-body-md-size);
+  --text-body-md--line-height: var(--md-sys-typescale-body-md-line);
+  --text-body-md--letter-spacing: var(--md-sys-typescale-body-md-track);
+  --text-body-md--font-weight: var(--md-sys-typescale-body-md-weight);
+  --text-body-sm: var(--md-sys-typescale-body-sm-size);
+  --text-body-sm--line-height: var(--md-sys-typescale-body-sm-line);
+  --text-body-sm--letter-spacing: var(--md-sys-typescale-body-sm-track);
+  --text-body-sm--font-weight: var(--md-sys-typescale-body-sm-weight);
+  --text-label-lg: var(--md-sys-typescale-label-lg-size);
+  --text-label-lg--line-height: var(--md-sys-typescale-label-lg-line);
+  --text-label-lg--letter-spacing: var(--md-sys-typescale-label-lg-track);
+  --text-label-lg--font-weight: var(--md-sys-typescale-label-lg-weight);
+  --text-label-md: var(--md-sys-typescale-label-md-size);
+  --text-label-md--line-height: var(--md-sys-typescale-label-md-line);
+  --text-label-md--letter-spacing: var(--md-sys-typescale-label-md-track);
+  --text-label-md--font-weight: var(--md-sys-typescale-label-md-weight);
+  --text-label-sm: var(--md-sys-typescale-label-sm-size);
+  --text-label-sm--line-height: var(--md-sys-typescale-label-sm-line);
+  --text-label-sm--letter-spacing: var(--md-sys-typescale-label-sm-track);
+  --text-label-sm--font-weight: var(--md-sys-typescale-label-sm-weight);
+
+  --ease-m3-standard: cubic-bezier(0.2, 0, 0, 1);
+  --ease-m3-emphasized: cubic-bezier(0.2, 0, 0, 1);
+  --ease-m3-emphasized-decel: cubic-bezier(0.05, 0.7, 0.1, 1);
+  --ease-m3-emphasized-accel: cubic-bezier(0.3, 0, 0.8, 0.15);
+
+  --transition-duration-50: 50ms;
+  --transition-duration-100: 100ms;
+  --transition-duration-150: 150ms;
+  --transition-duration-200: 200ms;
+  --transition-duration-250: 250ms;
+  --transition-duration-300: 300ms;
+  --transition-duration-350: 350ms;
+  --transition-duration-400: 400ms;
+  --transition-duration-450: 450ms;
+  --transition-duration-500: 500ms;
+}
+
+/*
+  The default border color has changed to `currentcolor` in Tailwind CSS v4,
+  so we've added these compatibility styles to make sure everything still
+  looks the same as it did with Tailwind CSS v3.
+
+  If we ever want to remove these styles, we need to add an explicit border
+  color utility to any element that depends on these defaults.
+*/
+@layer base {
+  *,
+  ::after,
+  ::before,
+  ::backdrop,
+  ::file-selector-button {
+    border-color: var(--color-gray-200, currentcolor);
+  }
+}
 
 /* WIG: dark color scheme on root so native UI (scrollbars, form controls,
    spinners) follows. */
@@ -21,7 +189,7 @@
 
 /* WIG: Headings get balanced wrapping (no widows). Body text gets pretty
    wrapping where supported. */
-  h1, h2, h3, h4 { text-wrap: balance; }
+h1, h2, h3, h4 { text-wrap: balance; }
 p { text-wrap: pretty; }
 
 /* WIG: Number columns and counters use tabular-nums so digit width doesn't
