@@ -12,14 +12,16 @@
  * `var(--md-sys-color-primary)`.
  */
 import { writeFileSync, mkdirSync } from 'node:fs'
-import { dirname, resolve } from 'node:path'
-import { fileURLToPath } from 'node:url'
-import {
-  argbFromHex,
-  hexFromArgb,
-  TonalPalette,
-  Hct,
-} from '@material/material-color-utilities'
+import { dirname, join, resolve } from 'node:path'
+import { fileURLToPath, pathToFileURL } from 'node:url'
+
+// The package exports map only exposes ".". That barrel loads scheme files
+// whose extensionless imports fail under Node ESM, so resolve the package
+// entry and import the .js modules this script actually uses.
+const mcuRoot = dirname(fileURLToPath(import.meta.resolve('@material/material-color-utilities')))
+const { argbFromHex, hexFromArgb } = await import(pathToFileURL(join(mcuRoot, 'utils/string_utils.js')).href)
+const { TonalPalette } = await import(pathToFileURL(join(mcuRoot, 'palettes/tonal_palette.js')).href)
+const { Hct } = await import(pathToFileURL(join(mcuRoot, 'hct/hct.js')).href)
 
 // ── Brand seeds ──────────────────────────────────────────────────────
 const PRIMARY_SEED = '#00f2ff'
