@@ -40,7 +40,7 @@
 
   <label class="flex flex-col gap-2">
     <span class="text-label-md text-on-surface-variant">Display time per image (fps)</span>
-    <input type="number" inputmode="numeric" autocomplete="off" min="1" max="30" step="1" bind:value={sequenceFps} disabled={isWriting} class="tabular max-w-[8rem]" />
+    <input type="number" inputmode="numeric" autocomplete="off" min="1" max="30" step="1" bind:value={sequenceFps} disabled={isWriting} class="tabular max-w-32" />
   </label>
   <p class="text-body-sm text-on-surface-variant">
     {#if sequenceFps === 1}Each image shows for 1 second

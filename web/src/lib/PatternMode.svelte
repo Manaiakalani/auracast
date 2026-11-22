@@ -192,8 +192,8 @@
         aria-label="{pat.name}: {pat.description}"
         data-pattern-card={pat.id}
         tabindex={selectedPattern?.id === pat.id || (!selectedPattern && i === 0) ? 0 : -1}
-        class="group flex flex-col items-center gap-1 rounded-xl px-2 py-2.5 text-center border-2 transition-[colors,box-shadow,transform] duration-150 ease-m3-standard active:scale-[0.97] focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface {selectedPattern?.id === pat.id
-          ? 'border-primary bg-primary-container/60 ring-1 ring-primary/40 shadow-elev-1'
+        class="group flex flex-col items-center gap-1 rounded-xl px-2 py-2.5 text-center border-2 transition-[colors,box-shadow,transform] duration-150 ease-m3-standard active:scale-[0.97] focus:outline-hidden focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface {selectedPattern?.id === pat.id
+          ? 'border-primary ring-1 ring-primary/40 shadow-elev-1'
           : 'border-outline-variant/60 bg-surface-container-low hover:border-primary/60 hover:bg-surface-container'}"
         onclick={() => onSelectPattern(pat)}
         disabled={isWriting}

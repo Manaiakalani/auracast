@@ -44,7 +44,7 @@
           type="button"
           aria-label={d.label}
           aria-current={active ? 'page' : undefined}
-          class="m3-nav-item group/nav relative flex flex-col items-center justify-center w-full h-full select-none touch-manipulation focus-visible:outline-none"
+          class="m3-nav-item group/nav relative flex flex-col items-center justify-center w-full h-full select-none touch-manipulation focus-visible:outline-hidden"
           onclick={() => select(d.value)}
         >
           <span class="indicator relative flex items-center justify-center min-w-[48px] sm:min-w-[64px] h-8 px-3 rounded-full transition-colors duration-200 ease-m3-emphasized {active ? 'bg-secondary-container' : 'bg-transparent'}">

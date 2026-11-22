@@ -107,7 +107,7 @@
 
 {#if open}
   <div
-    class="m3-dialog-scrim fixed inset-0 z-50 flex items-center justify-center bg-scrim/60 backdrop-blur-sm transition-opacity duration-200 ease-m3-standard"
+    class="m3-dialog-scrim fixed inset-0 z-50 flex items-center justify-center bg-transparent backdrop-blur-xs transition-opacity duration-200 ease-m3-standard"
     role="presentation"
     onclick={onScrimClick}
   >
@@ -117,7 +117,7 @@
       aria-modal="true"
       aria-labelledby={headline ? 'm3-dialog-title' : undefined}
       tabindex="-1"
-      class="m3-dialog relative bg-surface-container-high text-on-surface shadow-elev-3 flex flex-col focus:outline-none {fullScreenOnCompact ? 'w-full h-full sm:h-auto sm:max-h-[85vh] sm:max-w-lg sm:rounded-3xl' : 'w-full max-w-lg max-h-[85vh] rounded-3xl m-4'} {klass}"
+      class="m3-dialog relative bg-surface-container-high text-on-surface shadow-elev-3 flex flex-col focus:outline-hidden {fullScreenOnCompact ? 'w-full h-full sm:h-auto sm:max-h-[85vh] sm:max-w-lg sm:rounded-3xl' : 'w-full max-w-lg max-h-[85vh] rounded-3xl m-4'} {klass}"
     >
       <header class="flex items-start gap-3 px-6 pt-6 pb-3">
         {#if headline}

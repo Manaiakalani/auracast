@@ -71,7 +71,7 @@
   {disabled}
   aria-label={ariaLabel}
   aria-pressed={selected}
-  class="m3-icon-btn group/icb relative inline-flex items-center justify-center isolate rounded-full select-none touch-manipulation transition-[colors,transform] duration-150 ease-m3-standard focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface active:scale-[0.92] disabled:opacity-40 disabled:cursor-not-allowed disabled:active:scale-100 {sizeClass} {variantClass} {klass}"
+  class="m3-icon-btn group/icb relative inline-flex items-center justify-center isolate rounded-full select-none touch-manipulation transition-[colors,transform] duration-150 ease-m3-standard focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface active:scale-[0.92] disabled:opacity-40 disabled:cursor-not-allowed disabled:active:scale-100 {sizeClass} {variantClass} {klass}"
   {onclick}
   {onpointerdown}
   {onpointerup}

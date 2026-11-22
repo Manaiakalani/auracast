@@ -161,7 +161,7 @@
         {/if}
       </p>
 
-      <label class="flex flex-col gap-2 max-w-[12rem]">
+      <label class="flex flex-col gap-2 max-w-48">
         <span class="text-label-md text-on-surface-variant">Frame rate (fps)</span>
         <input type="number" inputmode="numeric" autocomplete="off" min="1" max="30" step="1" bind:value={videoFps} disabled={isWriting} class="tabular" />
       </label>

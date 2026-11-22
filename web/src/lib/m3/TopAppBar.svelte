@@ -24,7 +24,7 @@
 </script>
 
 <header class="m3-top-app-bar sticky top-0 z-30 w-full bg-surface backdrop-blur-md transition-shadow duration-200 ease-m3-standard {elevated ? 'shadow-elev-2 bg-surface-container' : ''} {klass}">
-  <div class="flex items-center gap-3 h-16 px-3 sm:px-6 max-w-screen-2xl mx-auto">
+  <div class="flex items-center gap-3 h-16 px-3 sm:px-6 max-w-(--breakpoint-2xl) mx-auto">
     {#if leading}
       <div class="flex items-center shrink-0">{@render leading()}</div>
     {/if}

@@ -57,7 +57,7 @@
           type="button"
           aria-label={d.label}
           aria-current={active ? 'page' : undefined}
-          class="m3-rail-item group/rail relative flex flex-col items-center justify-center gap-1 w-full py-1 min-h-[48px] select-none touch-manipulation focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface-container rounded-2xl"
+          class="m3-rail-item group/rail relative flex flex-col items-center justify-center gap-1 w-full py-1 min-h-[48px] select-none touch-manipulation focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface-container rounded-2xl"
           onclick={() => select(d.value)}
         >
           <span

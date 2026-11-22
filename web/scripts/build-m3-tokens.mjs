@@ -168,7 +168,7 @@ const elevationLevels = {
 // without the neon halo that only reads on a dark surface.
 // AuraCast brand glow recipes - primary only (the tertiary/ring variants
 // were removed because no component referenced `shadow-glow-tertiary` or
-// `shadow-glow-ring`; add them back here + in tailwind.config.js if a
+// `shadow-glow-ring`; add them back here + in src/app.css @theme if a
 // new design needs them).
 const glowDark = {
   primary: `0 0 0 1px ${role(primary, 80)}66, 0 0 24px ${role(primary, 70)}40`,
