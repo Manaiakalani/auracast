@@ -180,51 +180,66 @@ def _content_type_for(path: str) -> str:
     return _safe_content_type(mime)
 
 
-def _static_file(root: Path, url_path: str) -> Path | None:
-    """Return a file under root for url_path, or None if missing or outside root."""
+def _rel_from_url(url_path: str) -> str:
     rel = unquote(url_path).lstrip("/")
-    if "\x00" in rel:
-        return None
     if not rel or rel.endswith("/"):
         rel = (rel + "index.html") if rel else "index.html"
+    return rel
+
+
+def _open_under_root(root: Path, rel: str) -> tuple[str, bytes] | None:
+    """Open rel only after it is proven to stay under root.
+
+    CodeQL's py/path-injection sanitizer is a startswith check on a
+    normpath join. That check runs before realpath, isfile, or open.
+    The same check runs again on the realpath result so symlink escapes
+    are rejected too.
+    """
+    if "\x00" in rel:
+        return None
     try:
-        base = os.path.realpath(str(root))
-        target = os.path.realpath(os.path.join(base, rel))
+        base = os.path.normpath(os.path.realpath(str(root)))
     except (ValueError, OSError):
         return None
-    if target != base and not target.startswith(base + os.sep):
+    fullpath = os.path.normpath(os.path.join(base, rel))
+    if not fullpath.startswith(base + os.sep) and fullpath != base:
         return None
-    if os.path.isfile(target):
-        return Path(target)
+    try:
+        fullpath = os.path.normpath(os.path.realpath(fullpath))
+    except (ValueError, OSError):
+        return None
+    if not fullpath.startswith(base + os.sep) and fullpath != base:
+        return None
+    if not os.path.isfile(fullpath):
+        return None
+    with open(fullpath, "rb") as handle:
+        return fullpath, handle.read()
+
+
+def _static_file(root: Path, url_path: str) -> Path | None:
+    """Return a file under root for url_path, or None if missing or outside root."""
+    rel = _rel_from_url(url_path)
+    opened = _open_under_root(root, rel)
+    if opened is not None:
+        return Path(opened[0])
     if "." not in os.path.basename(rel):
-        try:
-            index = os.path.realpath(os.path.join(base, "index.html"))
-        except (ValueError, OSError):
-            return None
-        if index != base and not index.startswith(base + os.sep):
-            return None
-        if os.path.isfile(index):
-            return Path(index)
+        opened = _open_under_root(root, "index.html")
+        if opened is not None:
+            return Path(opened[0])
     return None
 
 
 def _read_static_file(root: Path, url_path: str) -> tuple[bytes, str] | None:
     """Read a contained static file. Rejects paths that escape root."""
-    found = _static_file(root, url_path)
-    if found is None:
+    raw = unquote(url_path).lstrip("/")
+    spa = bool(raw) and not raw.endswith("/") and "." not in os.path.basename(raw)
+    opened = _open_under_root(root, _rel_from_url(url_path))
+    if opened is None and spa:
+        opened = _open_under_root(root, "index.html")
+    if opened is None:
         return None
-    try:
-        base = os.path.realpath(str(root))
-        target = os.path.realpath(str(found))
-    except (ValueError, OSError):
-        return None
-    if target != base and not target.startswith(base + os.sep):
-        return None
-    if not os.path.isfile(target):
-        return None
-    with open(target, "rb") as handle:
-        body = handle.read()
-    return body, _content_type_for(target)
+    path, body = opened
+    return body, _content_type_for(path)
 
 
 _HELP = """<!doctype html>
