@@ -10,6 +10,12 @@ updates:
     ignore:
       - dependency-name: "typescript"
         update-types: ["version-update:semver-major"]
+      # Runtime is Node 22; keep @types/node on a matching line.
+      - dependency-name: "@types/node"
+        update-types: ["version-update:semver-major"]
+      # 0.4.0 ships ESM imports without file extensions, which Node cannot resolve.
+      - dependency-name: "@material/material-color-utilities"
+        versions: ["0.4.x"]
     groups:
       npm-deps:
         patterns:
